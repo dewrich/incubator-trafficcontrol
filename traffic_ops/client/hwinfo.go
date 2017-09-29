@@ -22,8 +22,8 @@ import (
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
 )
 
-// Hardware gets an array of Hardware
-func (to *Session) Hardware(limit int) ([]tostructs.Hardware, error) {
+// HWInfo gets an array of HWInfo
+func (to *Session) HWInfo(limit int) ([]tostructs.HWInfo, error) {
 	url := "/api/1.2/hwinfo.json"
 	if limit > 0 {
 		url += fmt.Sprintf("?limit=%v", limit)
@@ -34,7 +34,7 @@ func (to *Session) Hardware(limit int) ([]tostructs.Hardware, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.HardwareResponse
+	var data tostructs.HWInfoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

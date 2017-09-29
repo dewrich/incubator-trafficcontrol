@@ -19,17 +19,15 @@ package tostructs
  * under the License.
  */
 
-// HardwareResponse ...
-type HardwareResponse struct {
-	Limit    int        `json:"limit"`
-	Response []Hardware `json:"response"`
+// ProfileResponse ...
+type ProfilesResponse struct {
+	Response []Profile `json:"response"`
 }
 
-// Hardware ...
-type Hardware struct {
-	ID          int    `json:"serverId"`
-	HostName    string `json:"serverHostName"`
-	LastUpdated string `json:"lastUpdated"`
-	Value       string `json:"val"`
+// Profile ...
+type Profile struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
+	LastUpdated string `json:"lastUpdated"`
 }
