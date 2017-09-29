@@ -18,156 +18,18 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
 )
 
-// TRConfigResponse ...
-type TRConfigResponse struct {
-	Response TrafficRouterConfig `json:"response"`
-}
-
-// TrafficRouterConfig is the json unmarshalled without any changes
-// note all structs are local to this file _except_ the TrafficRouterConfig struct.
-type TrafficRouterConfig struct {
-	TrafficServers   []TrafficServer        `json:"trafficServers,omitempty"`
-	TrafficMonitors  []TrafficMonitor       `json:"trafficMonitors,omitempty"`
-	TrafficRouters   []TrafficRouter        `json:"trafficRouters,omitempty"`
-	CacheGroups      []TMCacheGroup         `json:"cacheGroups,omitempty"`
-	DeliveryServices []TRDeliveryService    `json:"deliveryServices,omitempty"`
-	Stats            map[string]interface{} `json:"stats,omitempty"`
-	Config           map[string]interface{} `json:"config,omitempty"`
-}
-
-// TrafficRouterConfigMap ...
-type TrafficRouterConfigMap struct {
-	TrafficServer   map[string]TrafficServer
-	TrafficMonitor  map[string]TrafficMonitor
-	TrafficRouter   map[string]TrafficRouter
-	CacheGroup      map[string]TMCacheGroup
-	DeliveryService map[string]TRDeliveryService
-	Config          map[string]interface{}
-	Stat            map[string]interface{}
-}
-
-// TrafficServer ...
-type TrafficServer struct {
-	Profile          string              `json:"profile"`
-	IP               string              `json:"ip"`
-	Status           string              `json:"status"`
-	CacheGroup       string              `json:"cacheGroup"`
-	IP6              string              `json:"ip6"`
-	Port             int                 `json:"port"`
-	HostName         string              `json:"hostName"`
-	FQDN             string              `json:"fqdn"`
-	InterfaceName    string              `json:"interfaceName"`
-	Type             string              `json:"type"`
-	HashID           string              `json:"hashId"`
-	DeliveryServices []tsdeliveryService `json:"deliveryServices,omitempty"` // the deliveryServices key does not exist on mids
-}
-
-type tsdeliveryService struct {
-	Xmlid  string   `json:"xmlId"`
-	Remaps []string `json:"remaps"`
-}
-
-// TrafficRouter ...
-type TrafficRouter struct {
-	Port     int    `json:"port"`
-	IP6      string `json:"ip6"`
-	IP       string `json:"ip"`
-	FQDN     string `json:"fqdn"`
-	Profile  string `json:"profile"`
-	Location string `json:"location"`
-	Status   string `json:"status"`
-	APIPort  int    `json:"apiPort"`
-}
-
-// TMCacheGroup ...
-// !!! Note the lowercase!!! this is local to this file, there's a CacheGroup definition in cachegroup.go!
-type TMCacheGroup struct {
-	Name        string      `json:"name"`
-	Coordinates Coordinates `json:"coordinates"`
-}
-
-// Coordinates ...
-type Coordinates struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-}
-
-// TRDeliveryService ...
-// TODO JvD: move to deliveryservice.go ??
-type TRDeliveryService struct {
-	XMLID             string            `json:"xmlId"`
-	Domains           []string          `json:"domains"`
-	RoutingName       string            `json:"routingName"`
-	MissLocation      MissLocation      `json:"missCoordinates"`
-	CoverageZoneOnly  bool              `json:"coverageZoneOnly"`
-	MatchSets         []MatchSet        `json:"matchSets"`
-	TTL               int               `json:"ttl"`
-	TTLs              TTLS              `json:"ttls"`
-	BypassDestination BypassDestination `json:"bypassDestination"`
-	StatcDNSEntries   []StaticDNS       `json:"statitDnsEntries"`
-	Soa               SOA               `json:"soa"`
-}
-
-// MissLocation ...
-type MissLocation struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitudef"`
-}
-
-// MatchSet ...
-type MatchSet struct {
-	Protocol  string      `json:"protocol"`
-	MatchList []MatchList `json:"matchList"`
-}
-
-// MatchList ...
-type MatchList struct {
-	Regex     string `json:"regex"`
-	MatchType string `json:"matchType"`
-}
-
-// BypassDestination ...
-type BypassDestination struct {
-	FQDN string `json:"fqdn"`
-	Type string `json:"type"`
-	Port int    `json:"Port"`
-}
-
-// TTLS ...
-type TTLS struct {
-	Arecord    int `json:"A"`
-	SoaRecord  int `json:"SOA"`
-	NsRecord   int `json:"NS"`
-	AaaaRecord int `json:"AAAA"`
-}
-
-// StaticDNS ...
-type StaticDNS struct {
-	Value string `json:"value"`
-	TTL   int    `json:"ttl"`
-	Name  string `json:"name"`
-	Type  string `json:"type"`
-}
-
-// SOA ...
-type SOA struct {
-	Admin   string `json:"admin"`
-	Retry   int    `json:"retry"`
-	Minimum int    `json:"minimum"`
-	Refresh int    `json:"refresh"`
-	Expire  int    `json:"expire"`
-}
-
 // TrafficRouterConfigMap Deprecated: use GetTrafficRouterConfigMap instead.
-func (to *Session) TrafficRouterConfigMap(cdn string) (*TrafficRouterConfigMap, error) {
+func (to *Session) TrafficRouterConfigMap(cdn string) (*tostructs.TrafficRouterConfigMap, error) {
 	cfg, _, err := to.GetTrafficRouterConfigMap(cdn)
 	return cfg, err
 }
 
 // TrafficRouterConfigMap gets a bunch of maps
-func (to *Session) GetTrafficRouterConfigMap(cdn string) (*TrafficRouterConfigMap, CacheHitStatus, error) {
+func (to *Session) GetTrafficRouterConfigMap(cdn string) (*tostructs.TrafficRouterConfigMap, CacheHitStatus, error) {
 	trConfig, cacheHitStatus, err := to.GetTrafficRouterConfig(cdn)
 	if err != nil {
 		return nil, CacheHitStatusInvalid, err
@@ -178,20 +40,20 @@ func (to *Session) GetTrafficRouterConfigMap(cdn string) (*TrafficRouterConfigMa
 }
 
 // TrafficRouterConfig Deprecated: use GetTrafficRouterConfig instead.
-func (to *Session) TrafficRouterConfig(cdn string) (*TrafficRouterConfig, error) {
+func (to *Session) TrafficRouterConfig(cdn string) (*tostructs.TrafficRouterConfig, error) {
 	cfg, _, err := to.GetTrafficRouterConfig(cdn)
 	return cfg, err
 }
 
 // GetTrafficRouterConfig gets the json arrays
-func (to *Session) GetTrafficRouterConfig(cdn string) (*TrafficRouterConfig, CacheHitStatus, error) {
+func (to *Session) GetTrafficRouterConfig(cdn string) (*tostructs.TrafficRouterConfig, CacheHitStatus, error) {
 	url := fmt.Sprintf("/api/1.2/cdns/%s/configs/routing.json", cdn)
 	body, cacheHitStatus, err := to.getBytesWithTTL(url, tmPollingInterval)
 	if err != nil {
 		return nil, CacheHitStatusInvalid, err
 	}
 
-	var data TRConfigResponse
+	var data tostructs.TRConfigResponse
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, CacheHitStatusInvalid, err
 	}
@@ -199,13 +61,13 @@ func (to *Session) GetTrafficRouterConfig(cdn string) (*TrafficRouterConfig, Cac
 }
 
 // TRTransformToMap ...
-func TRTransformToMap(trConfig TrafficRouterConfig) TrafficRouterConfigMap {
-	var tr TrafficRouterConfigMap
-	tr.TrafficServer = make(map[string]TrafficServer)
-	tr.TrafficMonitor = make(map[string]TrafficMonitor)
-	tr.TrafficRouter = make(map[string]TrafficRouter)
-	tr.CacheGroup = make(map[string]TMCacheGroup)
-	tr.DeliveryService = make(map[string]TRDeliveryService)
+func TRTransformToMap(trConfig tostructs.TrafficRouterConfig) tostructs.TrafficRouterConfigMap {
+	var tr tostructs.TrafficRouterConfigMap
+	tr.TrafficServer = make(map[string]tostructs.TrafficServer)
+	tr.TrafficMonitor = make(map[string]tostructs.TrafficMonitor)
+	tr.TrafficRouter = make(map[string]tostructs.TrafficRouter)
+	tr.CacheGroup = make(map[string]tostructs.TMCacheGroup)
+	tr.DeliveryService = make(map[string]tostructs.TRDeliveryService)
 	tr.Config = make(map[string]interface{})
 	tr.Stat = make(map[string]interface{})
 

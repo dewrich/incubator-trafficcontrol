@@ -39,3 +39,9 @@ type User struct {
 	NewUser      bool   `json:"newUser,omitempty"`
 	LastUpdated  string `json:"lastUpdated,omitempty"`
 }
+
+// Credentials contains Traffic Ops login credentials
+type UserCredentials struct {
+	Username string `json:"u"`
+	Password string `json:"p"`
+}

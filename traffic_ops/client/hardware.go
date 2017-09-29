@@ -15,26 +15,15 @@
 
 package client
 
-import "encoding/json"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
 
-// HardwareResponse ...
-type HardwareResponse struct {
-	Limit    int        `json:"limit"`
-	Response []Hardware `json:"response"`
-}
-
-// Hardware ...
-type Hardware struct {
-	ID          int    `json:"serverId"`
-	HostName    string `json:"serverHostName"`
-	LastUpdated string `json:"lastUpdated"`
-	Value       string `json:"val"`
-	Description string `json:"description"`
-}
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+)
 
 // Hardware gets an array of Hardware
-func (to *Session) Hardware(limit int) ([]Hardware, error) {
+func (to *Session) Hardware(limit int) ([]tostructs.Hardware, error) {
 	url := "/api/1.2/hwinfo.json"
 	if limit > 0 {
 		url += fmt.Sprintf("?limit=%v", limit)
@@ -45,7 +34,7 @@ func (to *Session) Hardware(limit int) ([]Hardware, error) {
 	}
 	defer resp.Body.Close()
 
-	var data HardwareResponse
+	var data tostructs.HardwareResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

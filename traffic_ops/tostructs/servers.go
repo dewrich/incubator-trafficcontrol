@@ -23,6 +23,11 @@ type ServersResponse struct {
 	Response []Server `json:"response"`
 }
 
+// ServerDetailResponse is the JSON object returned for a single server
+type ServersDetailResponse struct {
+	Response Server `json:"response"`
+}
+
 type Server struct {
 	Cachegroup     string `json:"cachegroup" db:"cachegroup"`
 	CachegroupID   int    `json:"cachegroupId" db:"cachegroup_id"`

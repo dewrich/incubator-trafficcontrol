@@ -15,27 +15,15 @@
 
 package client
 
-import "encoding/json"
+import (
+	"encoding/json"
 
-// CacheGroupResponse ...
-type CacheGroupResponse struct {
-	Response []CacheGroup `json:"response"`
-}
-
-// CacheGroup contains information about a given Cachegroup in Traffic Ops.
-type CacheGroup struct {
-	Name        string  `json:"name"`
-	ShortName   string  `json:"shortName"`
-	Latitude    float64 `json:"latitude"`
-	Longitude   float64 `json:"longitude"`
-	ParentName  string  `json:"parentCachegroupName,omitempty"`
-	Type        string  `json:"typeName,omitempty"`
-	LastUpdated string  `json:"lastUpdated,omitempty"`
-}
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+)
 
 // CacheGroups gets the CacheGroups in an array of CacheGroup structs
 // (note CacheGroup used to be called location)
-func (to *Session) CacheGroups() ([]CacheGroup, error) {
+func (to *Session) CacheGroups() ([]tostructs.CacheGroup, error) {
 	url := "/api/1.2/cachegroups.json"
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -43,7 +31,7 @@ func (to *Session) CacheGroups() ([]CacheGroup, error) {
 	}
 	defer resp.Body.Close()
 
-	var data CacheGroupResponse
+	var data tostructs.CacheGroupsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
