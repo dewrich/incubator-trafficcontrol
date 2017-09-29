@@ -79,11 +79,11 @@ func TestGetCdns(t *testing.T) {
 
 	servers, err := getCDNs(v, db, PrivLevelAdmin)
 	if err != nil {
-		t.Errorf("getCdns expected: nil error, actual: %v", err)
+		t.Errorf("getCDNs expected: nil error, actual: %v", err)
 	}
 
 	if len(servers) != 2 {
-		t.Errorf("getCdns expected: len(servers) == 1, actual: %v", len(servers))
+		t.Errorf("getCDNs expected: len(servers) == 1, actual: %v", len(servers))
 	}
 
 }
