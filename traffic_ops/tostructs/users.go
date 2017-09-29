@@ -19,14 +19,23 @@ package tostructs
  * under the License.
  */
 
-type CDNsResponse struct {
-	Response []CDN `json:"response"`
+// UsersResponse ...
+type UsersResponse struct {
+	Response []User `json:"response"`
 }
 
-type CDN struct {
-	DNSSECEnabled bool   `json:"dnssecEnabled" db:"dnssec_enabled"`
-	DomainName    string `json:"domainName" db:"domain_name"`
-	ID            int    `json:"id" db:"id"`
-	LastUpdated   string `json:"lastUpdated" db:"last_updated"`
-	Name          string `json:"name" db:"name"`
+// User contains information about a given user in Traffic Ops.
+type User struct {
+	Username     string `json:"username,omitempty"`
+	PublicSSHKey string `json:"publicSshKey,omitempty"`
+	Role         int    `json:"role,omitempty"`
+	RoleName     string `json:"rolename,omitempty"`
+	ID           int    `json:"id,omitempty"`
+	UID          int    `json:"uid,omitempty"`
+	GID          int    `json:"gid,omitempty"`
+	Company      string `json:"company,omitempty"`
+	Email        string `json:"email,omitempty"`
+	FullName     string `json:"fullName,omitempty"`
+	NewUser      bool   `json:"newUser,omitempty"`
+	LastUpdated  string `json:"lastUpdated,omitempty"`
 }

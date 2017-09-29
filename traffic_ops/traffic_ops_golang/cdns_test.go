@@ -30,9 +30,9 @@ import (
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func getTestCdns() []tostructs.Cdn {
-	cdns := []tostructs.Cdn{}
-	testCdn := tostructs.Cdn{
+func getTestCdns() []tostructs.CDN {
+	cdns := []tostructs.CDN{}
+	testCdn := tostructs.CDN{
 		DNSSECEnabled: false,
 		DomainName:    "domainName",
 		ID:            1,
@@ -59,7 +59,7 @@ func TestGetCdns(t *testing.T) {
 	defer db.Close()
 
 	testCdns := getTestCdns()
-	cols := test.ColsFromStructByTag("db", tostructs.Cdn{})
+	cols := test.ColsFromStructByTag("db", tostructs.CDN{})
 	rows := sqlmock.NewRows(cols)
 
 	//TODO: drichardson - build helper to add these Rows from the struct values
@@ -77,7 +77,7 @@ func TestGetCdns(t *testing.T) {
 	v := url.Values{}
 	v.Set("dsId", "1")
 
-	servers, err := getCdns(v, db, PrivLevelAdmin)
+	servers, err := getCDNs(v, db, PrivLevelAdmin)
 	if err != nil {
 		t.Errorf("getCdns expected: nil error, actual: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestGetCdns(t *testing.T) {
 
 }
 
-type SortableCdns []tostructs.Cdn
+type SortableCdns []tostructs.CDN
 
 func (s SortableCdns) Len() int {
 	return len(s)

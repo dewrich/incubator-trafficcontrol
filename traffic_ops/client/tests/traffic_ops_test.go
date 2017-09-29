@@ -13,14 +13,13 @@
    limitations under the License.
 */
 
-package test
+package tests
 
 import (
 	"net/http"
 	"testing"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
-	"github.com/jheitz200/test_helper"
 )
 
 func TestLogin(t *testing.T) {
