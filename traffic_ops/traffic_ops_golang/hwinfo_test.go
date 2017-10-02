@@ -23,16 +23,16 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/test"
 	"github.com/jmoiron/sqlx"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func getTestHWInfo() []tostructs.HWInfo {
-	hwinfo := []tostructs.HWInfo{}
-	testHWInfo := tostructs.HWInfo{
+func getTestHWInfo() []toapi.HWInfo {
+	hwinfo := []toapi.HWInfo{}
+	testHWInfo := toapi.HWInfo{
 		ID:          1,
 		ServerID:    1,
 		Description: "Description",
@@ -60,7 +60,7 @@ func TestGetHWInfo(t *testing.T) {
 	defer db.Close()
 
 	testHWInfo := getTestHWInfo()
-	cols := test.ColsFromStructByTag("db", tostructs.HWInfo{})
+	cols := test.ColsFromStructByTag("db", toapi.HWInfo{})
 	rows := sqlmock.NewRows(cols)
 
 	//TODO: drichardson - build helper to add these Rows from the struct values
@@ -88,7 +88,7 @@ func TestGetHWInfo(t *testing.T) {
 	}
 }
 
-type SortableHWInfo []tostructs.HWInfo
+type SortableHWInfo []toapi.HWInfo
 
 func (s SortableHWInfo) Len() int {
 	return len(s)

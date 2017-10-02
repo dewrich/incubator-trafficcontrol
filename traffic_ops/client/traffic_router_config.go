@@ -19,17 +19,17 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // TrafficRouterConfigMap Deprecated: use GetTrafficRouterConfigMap instead.
-func (to *Session) TrafficRouterConfigMap(cdn string) (*tostructs.TrafficRouterConfigMap, error) {
+func (to *Session) TrafficRouterConfigMap(cdn string) (*toapi.TrafficRouterConfigMap, error) {
 	cfg, _, err := to.GetTrafficRouterConfigMap(cdn)
 	return cfg, err
 }
 
 // TrafficRouterConfigMap gets a bunch of maps
-func (to *Session) GetTrafficRouterConfigMap(cdn string) (*tostructs.TrafficRouterConfigMap, CacheHitStatus, error) {
+func (to *Session) GetTrafficRouterConfigMap(cdn string) (*toapi.TrafficRouterConfigMap, CacheHitStatus, error) {
 	trConfig, cacheHitStatus, err := to.GetTrafficRouterConfig(cdn)
 	if err != nil {
 		return nil, CacheHitStatusInvalid, err
@@ -40,20 +40,20 @@ func (to *Session) GetTrafficRouterConfigMap(cdn string) (*tostructs.TrafficRout
 }
 
 // TrafficRouterConfig Deprecated: use GetTrafficRouterConfig instead.
-func (to *Session) TrafficRouterConfig(cdn string) (*tostructs.TrafficRouterConfig, error) {
+func (to *Session) TrafficRouterConfig(cdn string) (*toapi.TrafficRouterConfig, error) {
 	cfg, _, err := to.GetTrafficRouterConfig(cdn)
 	return cfg, err
 }
 
 // GetTrafficRouterConfig gets the json arrays
-func (to *Session) GetTrafficRouterConfig(cdn string) (*tostructs.TrafficRouterConfig, CacheHitStatus, error) {
+func (to *Session) GetTrafficRouterConfig(cdn string) (*toapi.TrafficRouterConfig, CacheHitStatus, error) {
 	url := fmt.Sprintf("/api/1.2/cdns/%s/configs/routing.json", cdn)
 	body, cacheHitStatus, err := to.getBytesWithTTL(url, tmPollingInterval)
 	if err != nil {
 		return nil, CacheHitStatusInvalid, err
 	}
 
-	var data tostructs.TRConfigResponse
+	var data toapi.TRConfigResponse
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, CacheHitStatusInvalid, err
 	}
@@ -61,13 +61,13 @@ func (to *Session) GetTrafficRouterConfig(cdn string) (*tostructs.TrafficRouterC
 }
 
 // TRTransformToMap ...
-func TRTransformToMap(trConfig tostructs.TrafficRouterConfig) tostructs.TrafficRouterConfigMap {
-	var tr tostructs.TrafficRouterConfigMap
-	tr.TrafficServer = make(map[string]tostructs.TrafficServer)
-	tr.TrafficMonitor = make(map[string]tostructs.TrafficMonitor)
-	tr.TrafficRouter = make(map[string]tostructs.TrafficRouter)
-	tr.CacheGroup = make(map[string]tostructs.TMCacheGroup)
-	tr.DeliveryService = make(map[string]tostructs.TRDeliveryService)
+func TRTransformToMap(trConfig toapi.TrafficRouterConfig) toapi.TrafficRouterConfigMap {
+	var tr toapi.TrafficRouterConfigMap
+	tr.TrafficServer = make(map[string]toapi.TrafficServer)
+	tr.TrafficMonitor = make(map[string]toapi.TrafficMonitor)
+	tr.TrafficRouter = make(map[string]toapi.TrafficRouter)
+	tr.CacheGroup = make(map[string]toapi.TMCacheGroup)
+	tr.DeliveryService = make(map[string]toapi.TRDeliveryService)
 	tr.Config = make(map[string]interface{})
 	tr.Stat = make(map[string]interface{})
 

@@ -19,11 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // Parameters gets an array of parameter structs for the profile given
-func (to *Session) Parameters(profileName string) ([]tostructs.Parameter, error) {
+func (to *Session) Parameters(profileName string) ([]toapi.Parameter, error) {
 	url := fmt.Sprintf("/api/1.2/parameters/profile/%s.json", profileName)
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -31,7 +31,7 @@ func (to *Session) Parameters(profileName string) ([]tostructs.Parameter, error)
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.ParamResponse
+	var data toapi.ParamResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

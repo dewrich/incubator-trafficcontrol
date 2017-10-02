@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,13 +19,18 @@ package tostructs
  * under the License.
  */
 
-// Result {"response":[{"level":"success","text":"Successfully logged in."}],"version":"1.1"}
-type Response struct {
-	Alerts []Alert
+// CacheGroupResponse ...
+type CacheGroupsResponse struct {
+	Response []CacheGroup `json:"response"`
 }
 
-// Alert ...
-type Alert struct {
-	Level string `json:"level"`
-	Text  string `json:"text"`
+// CacheGroup contains information about a given Cachegroup in Traffic Ops.
+type CacheGroup struct {
+	Name        string  `json:"name"`
+	ShortName   string  `json:"shortName"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	ParentName  string  `json:"parentCachegroupName,omitempty"`
+	Type        string  `json:"typeName,omitempty"`
+	LastUpdated string  `json:"lastUpdated,omitempty"`
 }

@@ -17,11 +17,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // SummaryStats ...
-func (to *Session) SummaryStats(cdn string, deliveryService string, statName string) ([]tostructs.StatsSummary, error) {
+func (to *Session) SummaryStats(cdn string, deliveryService string, statName string) ([]toapi.StatsSummary, error) {
 	var queryParams []string
 	if len(cdn) > 0 {
 		queryParams = append(queryParams, fmt.Sprintf("cdnName=%s", cdn))
@@ -51,7 +51,7 @@ func (to *Session) SummaryStats(cdn string, deliveryService string, statName str
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.StatsSummaryResponse
+	var data toapi.StatsSummaryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (to *Session) SummaryStatsLastUpdated(statName string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.LastUpdated
+	var data toapi.LastUpdated
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return "", err
 	}
@@ -85,7 +85,7 @@ func (to *Session) SummaryStatsLastUpdated(statName string) (string, error) {
 }
 
 // AddSummaryStats ...
-func (to *Session) AddSummaryStats(statsSummary tostructs.StatsSummary) error {
+func (to *Session) AddSummaryStats(statsSummary toapi.StatsSummary) error {
 	reqBody, err := json.Marshal(statsSummary)
 	if err != nil {
 		return err

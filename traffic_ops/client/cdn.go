@@ -19,11 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // CDNs gets an array of CDNs
-func (to *Session) CDNs() ([]tostructs.CDN, error) {
+func (to *Session) CDNs() ([]toapi.CDN, error) {
 	url := "/api/1.2/cdns.json"
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -31,7 +31,7 @@ func (to *Session) CDNs() ([]tostructs.CDN, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.CDNsResponse
+	var data toapi.CDNsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (to *Session) CDNs() ([]tostructs.CDN, error) {
 }
 
 // CDNName gets an array of CDNs
-func (to *Session) CDNName(name string) ([]tostructs.CDN, error) {
+func (to *Session) CDNName(name string) ([]toapi.CDN, error) {
 	url := fmt.Sprintf("/api/1.2/cdns/name/%s.json", name)
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -47,7 +47,7 @@ func (to *Session) CDNName(name string) ([]tostructs.CDN, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.CDNsResponse
+	var data toapi.CDNsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

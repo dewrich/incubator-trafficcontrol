@@ -27,6 +27,7 @@ import (
 
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/common/log"
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/crconfig"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	to "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
 )
 
@@ -34,15 +35,15 @@ import (
 type ITrafficOpsSession interface {
 	CRConfigRaw(cdn string) ([]byte, error)
 	LastCRConfig(cdn string) ([]byte, time.Time, error)
-	TrafficMonitorConfigMap(cdn string) (*to.TrafficMonitorConfigMap, error)
+	TrafficMonitorConfigMap(cdn string) (*toapi.TrafficMonitorConfigMap, error)
 	Set(session *to.Session)
 	URL() (string, error)
 	User() (string, error)
-	Servers() ([]to.Server, error)
-	Profiles() ([]to.Profile, error)
-	Parameters(profileName string) ([]to.Parameter, error)
-	DeliveryServices() ([]to.DeliveryService, error)
-	CacheGroups() ([]to.CacheGroup, error)
+	Servers() ([]toapi.Server, error)
+	Profiles() ([]toapi.Profile, error)
+	Parameters(profileName string) ([]toapi.Parameter, error)
+	DeliveryServices() ([]toapi.DeliveryService, error)
+	CacheGroups() ([]toapi.CacheGroup, error)
 }
 
 var ErrNilSession = fmt.Errorf("nil session")
@@ -146,7 +147,7 @@ func (s TrafficOpsSessionThreadsafe) LastCRConfig(cdn string) ([]byte, time.Time
 }
 
 // TrafficMonitorConfigMapRaw returns the Traffic Monitor config map from the Traffic Ops, directly from the monitoring.json endpoint. This is not usually what is needed, rather monitoring needs the snapshotted CRConfig data, which is filled in by `TrafficMonitorConfigMap`. This is safe for multiple goroutines.
-func (s TrafficOpsSessionThreadsafe) trafficMonitorConfigMapRaw(cdn string) (*to.TrafficMonitorConfigMap, error) {
+func (s TrafficOpsSessionThreadsafe) trafficMonitorConfigMapRaw(cdn string) (*toapi.TrafficMonitorConfigMap, error) {
 	ss := s.get()
 	if ss == nil {
 		return nil, ErrNilSession
@@ -155,7 +156,7 @@ func (s TrafficOpsSessionThreadsafe) trafficMonitorConfigMapRaw(cdn string) (*to
 }
 
 // TrafficMonitorConfigMap returns the Traffic Monitor config map from the Traffic Ops. This is safe for multiple goroutines.
-func (s TrafficOpsSessionThreadsafe) TrafficMonitorConfigMap(cdn string) (*to.TrafficMonitorConfigMap, error) {
+func (s TrafficOpsSessionThreadsafe) TrafficMonitorConfigMap(cdn string) (*toapi.TrafficMonitorConfigMap, error) {
 	mc, err := s.trafficMonitorConfigMapRaw(cdn)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor config map: %v", err)
@@ -179,11 +180,11 @@ func (s TrafficOpsSessionThreadsafe) TrafficMonitorConfigMap(cdn string) (*to.Tr
 	return mc, nil
 }
 
-func CreateMonitorConfig(crConfig crconfig.CRConfig, mc *to.TrafficMonitorConfigMap) (*to.TrafficMonitorConfigMap, error) {
+func CreateMonitorConfig(crConfig crconfig.CRConfig, mc *toapi.TrafficMonitorConfigMap) (*toapi.TrafficMonitorConfigMap, error) {
 	// Dump the "live" monitoring.json servers, and populate with the "snapshotted" CRConfig
-	mc.TrafficServer = map[string]to.TrafficServer{}
+	mc.TrafficServer = map[string]toapi.TrafficServer{}
 	for name, srv := range crConfig.ContentServers {
-		s := to.TrafficServer{}
+		s := toapi.TrafficServer{}
 		if srv.Profile != nil {
 			s.Profile = *srv.Profile
 		} else {
@@ -239,10 +240,10 @@ func CreateMonitorConfig(crConfig crconfig.CRConfig, mc *to.TrafficMonitorConfig
 	}
 
 	// Dump the "live" monitoring.json monitors, and populate with the "snapshotted" CRConfig
-	mc.TrafficMonitor = map[string]to.TrafficMonitor{}
+	mc.TrafficMonitor = map[string]toapi.TrafficMonitor{}
 	for name, mon := range crConfig.Monitors {
 		// monitorProfile = *mon.Profile
-		m := to.TrafficMonitor{}
+		m := toapi.TrafficMonitor{}
 		if mon.Port != nil {
 			m.Port = *mon.Port
 		} else {
@@ -285,13 +286,13 @@ func CreateMonitorConfig(crConfig crconfig.CRConfig, mc *to.TrafficMonitorConfig
 	// Dump the "live" monitoring.json DeliveryServices, and populate with the "snapshotted" CRConfig
 	// But keep using the monitoring.json thresholds, because they're not in the CRConfig.
 	rawDeliveryServices := mc.DeliveryService
-	mc.DeliveryService = map[string]to.TMDeliveryService{}
+	mc.DeliveryService = map[string]toapi.TMDeliveryService{}
 	for name, _ := range crConfig.DeliveryServices {
 		if rawDS, ok := rawDeliveryServices[name]; ok {
 			// use the raw DS if it exists, because the CRConfig doesn't have thresholds or statuses
 			mc.DeliveryService[name] = rawDS
 		} else {
-			mc.DeliveryService[name] = to.TMDeliveryService{
+			mc.DeliveryService[name] = toapi.TMDeliveryService{
 				XMLID:              name,
 				TotalTPSThreshold:  0,
 				Status:             "REPORTED",
@@ -302,7 +303,7 @@ func CreateMonitorConfig(crConfig crconfig.CRConfig, mc *to.TrafficMonitorConfig
 	return mc, nil
 }
 
-func (s TrafficOpsSessionThreadsafe) Servers() ([]to.Server, error) {
+func (s TrafficOpsSessionThreadsafe) Servers() ([]toapi.Server, error) {
 	ss := s.get()
 	if ss == nil {
 		return nil, ErrNilSession
@@ -310,7 +311,7 @@ func (s TrafficOpsSessionThreadsafe) Servers() ([]to.Server, error) {
 	return ss.Servers()
 }
 
-func (s TrafficOpsSessionThreadsafe) Profiles() ([]to.Profile, error) {
+func (s TrafficOpsSessionThreadsafe) Profiles() ([]toapi.Profile, error) {
 	ss := s.get()
 	if ss == nil {
 		return nil, ErrNilSession
@@ -318,7 +319,7 @@ func (s TrafficOpsSessionThreadsafe) Profiles() ([]to.Profile, error) {
 	return ss.Profiles()
 }
 
-func (s TrafficOpsSessionThreadsafe) Parameters(profileName string) ([]to.Parameter, error) {
+func (s TrafficOpsSessionThreadsafe) Parameters(profileName string) ([]toapi.Parameter, error) {
 	ss := s.get()
 	if ss == nil {
 		return nil, ErrNilSession
@@ -326,7 +327,7 @@ func (s TrafficOpsSessionThreadsafe) Parameters(profileName string) ([]to.Parame
 	return ss.Parameters(profileName)
 }
 
-func (s TrafficOpsSessionThreadsafe) DeliveryServices() ([]to.DeliveryService, error) {
+func (s TrafficOpsSessionThreadsafe) DeliveryServices() ([]toapi.DeliveryService, error) {
 	ss := s.get()
 	if ss == nil {
 		return nil, ErrNilSession
@@ -334,7 +335,7 @@ func (s TrafficOpsSessionThreadsafe) DeliveryServices() ([]to.DeliveryService, e
 	return ss.DeliveryServices()
 }
 
-func (s TrafficOpsSessionThreadsafe) CacheGroups() ([]to.CacheGroup, error) {
+func (s TrafficOpsSessionThreadsafe) CacheGroups() ([]toapi.CacheGroup, error) {
 	ss := s.get()
 	if ss == nil {
 		return nil, ErrNilSession

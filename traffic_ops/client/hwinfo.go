@@ -19,11 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // HWInfo gets an array of HWInfo
-func (to *Session) HWInfo(limit int) ([]tostructs.HWInfo, error) {
+func (to *Session) HWInfo(limit int) ([]toapi.HWInfo, error) {
 	url := "/api/1.2/hwinfo.json"
 	if limit > 0 {
 		url += fmt.Sprintf("?limit=%v", limit)
@@ -34,7 +34,7 @@ func (to *Session) HWInfo(limit int) ([]tostructs.HWInfo, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.HWInfoResponse
+	var data toapi.HWInfoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

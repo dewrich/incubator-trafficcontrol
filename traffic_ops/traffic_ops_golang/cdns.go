@@ -26,7 +26,7 @@ import (
 	"net/url"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/common/log"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -58,19 +58,19 @@ func cdnsHandler(db *sqlx.DB) AuthRegexHandlerFunc {
 	}
 }
 
-func getCDNsResponse(q url.Values, db *sqlx.DB, privLevel int) (*tostructs.CDNsResponse, error) {
+func getCDNsResponse(q url.Values, db *sqlx.DB, privLevel int) (*toapi.CDNsResponse, error) {
 	cdns, err := getCDNs(q, db, privLevel)
 	if err != nil {
 		return nil, fmt.Errorf("getting cdns response: %v", err)
 	}
 
-	resp := tostructs.CDNsResponse{
+	resp := toapi.CDNsResponse{
 		Response: cdns,
 	}
 	return &resp, nil
 }
 
-func getCDNs(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.CDN, error) {
+func getCDNs(v url.Values, db *sqlx.DB, privLevel int) ([]toapi.CDN, error) {
 
 	var rows *sqlx.Rows
 	var err error
@@ -82,11 +82,11 @@ func getCDNs(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.CDN, error) 
 		//                    Test for bad Query Parameters
 		return nil, err
 	}
-	cdns := []tostructs.CDN{}
+	cdns := []toapi.CDN{}
 
 	defer rows.Close()
 	for rows.Next() {
-		var s tostructs.CDN
+		var s toapi.CDN
 		if err = rows.StructScan(&s); err != nil {
 			return nil, fmt.Errorf("getting cdns: %v", err)
 		}

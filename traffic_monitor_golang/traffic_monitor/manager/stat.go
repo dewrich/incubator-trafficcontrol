@@ -31,7 +31,7 @@ import (
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/peer"
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/threadsafe"
 	todata "github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/trafficopsdata"
-	to "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 func pruneHistory(history []cache.Result, limit uint64) []cache.Result {
@@ -138,7 +138,7 @@ func processStatResults(
 	lastStatEndTimes map[enum.CacheName]time.Time,
 	lastStatDurationsThreadsafe threadsafe.DurationMap,
 	unpolledCaches threadsafe.UnpolledCaches,
-	mc to.TrafficMonitorConfigMap,
+	mc toapi.TrafficMonitorConfigMap,
 	precomputedData map[enum.CacheName]cache.PrecomputedData,
 	lastResults map[enum.CacheName]cache.Result,
 	localStates peer.CRStatesThreadsafe,

@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,13 +19,13 @@ package tostructs
  * under the License.
  */
 
-type RegionsResponse struct {
-	Response []Region `json:"response"`
+// Result {"response":[{"level":"success","text":"Successfully logged in."}],"version":"1.1"}
+type Response struct {
+	Alerts []Alert
 }
 
-type Region struct {
-	Division    int    `json:"division" db:"division"`
-	ID          int    `json:"id" db:"id"`
-	LastUpdated string `json:"lastUpdated" db:"last_updated"`
-	Name        string `json:"name" db:"name"`
+// Alert ...
+type Alert struct {
+	Level string `json:"level"`
+	Text  string `json:"text"`
 }

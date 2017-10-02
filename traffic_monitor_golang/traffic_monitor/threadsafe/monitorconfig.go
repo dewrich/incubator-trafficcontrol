@@ -22,18 +22,18 @@ package threadsafe
 import (
 	"sync"
 
-	to "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // CopyTrafficMonitorConfigMap returns a deep copy of the given TrafficMonitorConfigMap
-func CopyTrafficMonitorConfigMap(a *to.TrafficMonitorConfigMap) to.TrafficMonitorConfigMap {
-	b := to.TrafficMonitorConfigMap{}
-	b.TrafficServer = map[string]to.TrafficServer{}
-	b.CacheGroup = map[string]to.TMCacheGroup{}
+func CopyTrafficMonitorConfigMap(a *toapi.TrafficMonitorConfigMap) toapi.TrafficMonitorConfigMap {
+	b := toapi.TrafficMonitorConfigMap{}
+	b.TrafficServer = map[string]toapi.TrafficServer{}
+	b.CacheGroup = map[string]toapi.TMCacheGroup{}
 	b.Config = map[string]interface{}{}
-	b.TrafficMonitor = map[string]to.TrafficMonitor{}
-	b.DeliveryService = map[string]to.TMDeliveryService{}
-	b.Profile = map[string]to.TMProfile{}
+	b.TrafficMonitor = map[string]toapi.TrafficMonitor{}
+	b.DeliveryService = map[string]toapi.TMDeliveryService{}
+	b.Profile = map[string]toapi.TMProfile{}
 	for k, v := range a.TrafficServer {
 		b.TrafficServer[k] = v
 	}
@@ -57,24 +57,24 @@ func CopyTrafficMonitorConfigMap(a *to.TrafficMonitorConfigMap) to.TrafficMonito
 
 // TrafficMonitorConfigMapThreadsafe encapsulates a TrafficMonitorConfigMap safe for multiple readers and a single writer.
 type TrafficMonitorConfigMap struct {
-	monitorConfig *to.TrafficMonitorConfigMap
+	monitorConfig *toapi.TrafficMonitorConfigMap
 	m             *sync.RWMutex
 }
 
 // NewTrafficMonitorConfigMap returns an encapsulated TrafficMonitorConfigMap safe for multiple readers and a single writer.
 func NewTrafficMonitorConfigMap() TrafficMonitorConfigMap {
-	return TrafficMonitorConfigMap{monitorConfig: &to.TrafficMonitorConfigMap{}, m: &sync.RWMutex{}}
+	return TrafficMonitorConfigMap{monitorConfig: &toapi.TrafficMonitorConfigMap{}, m: &sync.RWMutex{}}
 }
 
 // Get returns the TrafficMonitorConfigMap. Callers MUST NOT modify, it is not threadsafe for mutation. If mutation is necessary, call CopyTrafficMonitorConfigMap().
-func (t *TrafficMonitorConfigMap) Get() to.TrafficMonitorConfigMap {
+func (t *TrafficMonitorConfigMap) Get() toapi.TrafficMonitorConfigMap {
 	t.m.RLock()
 	defer t.m.RUnlock()
 	return *t.monitorConfig
 }
 
 // Set sets the TrafficMonitorConfigMap. This is only safe for one writer. This MUST NOT be called by multiple threads.
-func (t *TrafficMonitorConfigMap) Set(c to.TrafficMonitorConfigMap) {
+func (t *TrafficMonitorConfigMap) Set(c toapi.TrafficMonitorConfigMap) {
 	t.m.Lock()
 	*t.monitorConfig = c
 	t.m.Unlock()

@@ -25,7 +25,7 @@ import (
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/enum"
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/peer"
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/traffic_monitor/threadsafe"
-	to "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 func srvAPICacheDownCount(localStates peer.CRStatesThreadsafe, monitorConfig threadsafe.TrafficMonitorConfigMap) []byte {
@@ -33,7 +33,7 @@ func srvAPICacheDownCount(localStates peer.CRStatesThreadsafe, monitorConfig thr
 }
 
 // cacheOfflineCount returns the total reported caches marked down, excluding status offline and admin_down.
-func cacheDownCount(caches map[enum.CacheName]peer.IsAvailable, toServers map[string]to.TrafficServer) int {
+func cacheDownCount(caches map[enum.CacheName]peer.IsAvailable, toServers map[string]toapi.TrafficServer) int {
 	count := 0
 	for cache, available := range caches {
 		if !available.IsAvailable && enum.CacheStatusFromString(toServers[string(cache)].Status) == enum.CacheStatusReported {

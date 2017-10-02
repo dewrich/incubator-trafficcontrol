@@ -19,12 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
-
 // TrafficMonitorConfigMap ...
-func (to *Session) TrafficMonitorConfigMap(cdn string) (*tostructs.TrafficMonitorConfigMap, error) {
+func (to *Session) TrafficMonitorConfigMap(cdn string) (*toapi.TrafficMonitorConfigMap, error) {
 	tmConfig, err := to.TrafficMonitorConfig(cdn)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func (to *Session) TrafficMonitorConfigMap(cdn string) (*tostructs.TrafficMonito
 }
 
 // TrafficMonitorConfig ...
-func (to *Session) TrafficMonitorConfig(cdn string) (*tostructs.TrafficMonitorConfig, error) {
+func (to *Session) TrafficMonitorConfig(cdn string) (*toapi.TrafficMonitorConfig, error) {
 	url := fmt.Sprintf("/api/1.2/cdns/%s/configs/monitoring.json", cdn)
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -45,7 +44,7 @@ func (to *Session) TrafficMonitorConfig(cdn string) (*tostructs.TrafficMonitorCo
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.TMConfigResponse
+	var data toapi.TMConfigResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
@@ -53,15 +52,15 @@ func (to *Session) TrafficMonitorConfig(cdn string) (*tostructs.TrafficMonitorCo
 	return &data.Response, nil
 }
 
-func trafficMonitorTransformToMap(tmConfig *tostructs.TrafficMonitorConfig) (*tostructs.TrafficMonitorConfigMap, error) {
-	var tm tostructs.TrafficMonitorConfigMap
+func trafficMonitorTransformToMap(tmConfig *toapi.TrafficMonitorConfig) (*toapi.TrafficMonitorConfigMap, error) {
+	var tm toapi.TrafficMonitorConfigMap
 
-	tm.TrafficServer = make(map[string]tostructs.TrafficServer)
-	tm.CacheGroup = make(map[string]tostructs.TMCacheGroup)
+	tm.TrafficServer = make(map[string]toapi.TrafficServer)
+	tm.CacheGroup = make(map[string]toapi.TMCacheGroup)
 	tm.Config = make(map[string]interface{})
-	tm.TrafficMonitor = make(map[string]tostructs.TrafficMonitor)
-	tm.DeliveryService = make(map[string]tostructs.TMDeliveryService)
-	tm.Profile = make(map[string]tostructs.TMProfile)
+	tm.TrafficMonitor = make(map[string]toapi.TrafficMonitor)
+	tm.DeliveryService = make(map[string]toapi.TMDeliveryService)
+	tm.Profile = make(map[string]toapi.TMProfile)
 
 	for _, trafficServer := range tmConfig.TrafficServers {
 		tm.TrafficServer[trafficServer.HostName] = trafficServer

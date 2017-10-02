@@ -21,11 +21,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // Servers gets an array of servers
-func (to *Session) Servers() ([]tostructs.Server, error) {
+func (to *Session) Servers() ([]toapi.Server, error) {
 	url := "/api/1.2/servers.json"
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -33,7 +33,7 @@ func (to *Session) Servers() ([]tostructs.Server, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.ServersResponse
+	var data toapi.ServersResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (to *Session) Servers() ([]tostructs.Server, error) {
 }
 
 // Server gets a server by hostname
-func (to *Session) Server(name string) (*tostructs.Server, error) {
+func (to *Session) Server(name string) (*toapi.Server, error) {
 	url := fmt.Sprintf("/api/1.2/servers/hostname/%s/details", name)
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -50,7 +50,7 @@ func (to *Session) Server(name string) (*tostructs.Server, error) {
 	}
 	defer resp.Body.Close()
 
-	data := tostructs.ServersDetailResponse{}
+	data := toapi.ServersDetailResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (to *Session) Server(name string) (*tostructs.Server, error) {
 }
 
 // ServersByType gets an array of serves of a specified type.
-func (to *Session) ServersByType(qparams url.Values) ([]tostructs.Server, error) {
+func (to *Session) ServersByType(qparams url.Values) ([]toapi.Server, error) {
 	url := fmt.Sprintf("/api/1.2/servers.json?%s", qparams.Encode())
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -67,7 +67,7 @@ func (to *Session) ServersByType(qparams url.Values) ([]tostructs.Server, error)
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.ServersResponse
+	var data toapi.ServersResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

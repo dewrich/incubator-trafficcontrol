@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 import (
 	"encoding/json"

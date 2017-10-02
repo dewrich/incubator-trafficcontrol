@@ -27,14 +27,15 @@ import (
 	"strconv"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/common/log"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	"github.com/jmoiron/sqlx"
+
+	"database/sql"
+	"strings"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/api"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/ats"
-	"database/sql"
 	"github.com/lib/pq"
-	"strings"
 )
 
 // ServersPrivLevel - privileges for the /servers endpoint
@@ -72,19 +73,19 @@ func serversHandler(db *sqlx.DB) AuthRegexHandlerFunc {
 	}
 }
 
-func getServersResponse(v url.Values, db *sqlx.DB, privLevel int) (*tostructs.ServersResponse, error) {
+func getServersResponse(v url.Values, db *sqlx.DB, privLevel int) (*toapi.ServersResponse, error) {
 	servers, err := getServers(v, db, privLevel)
 	if err != nil {
 		return nil, fmt.Errorf("getting servers response: %v", err)
 	}
 
-	resp := tostructs.ServersResponse{
+	resp := toapi.ServersResponse{
 		Response: servers,
 	}
 	return &resp, nil
 }
 
-func getServers(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.Server, error) {
+func getServers(v url.Values, db *sqlx.DB, privLevel int) ([]toapi.Server, error) {
 
 	var rows *sqlx.Rows
 	var err error
@@ -108,14 +109,14 @@ func getServers(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.Server, e
 	if err != nil {
 		return nil, fmt.Errorf("querying: %v", err)
 	}
-	servers := []tostructs.Server{}
+	servers := []toapi.Server{}
 
 	const HiddenField = "********"
 
 	defer rows.Close()
 
 	for rows.Next() {
-		var s tostructs.Server
+		var s toapi.Server
 		if err = rows.StructScan(&s); err != nil {
 			return nil, fmt.Errorf("getting servers: %v", err)
 		}
@@ -363,7 +364,7 @@ func assignDeliveryServicesToServer(server int, dses []int, replace bool, db *sq
 			} else {
 				delete = append(delete, param)
 			}
-			param = ats.GetConfigFile(ats.CacheUrlPrefix,XmlId.String)
+			param = ats.GetConfigFile(ats.CacheUrlPrefix, XmlId.String)
 			if CacheUrl.Valid && len(CacheUrl.String) > 0 {
 				insert = append(insert, param)
 			} else {

@@ -19,12 +19,12 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // Types gets an array of Types.
 // optional parameter: userInTable
-func (to *Session) Types(useInTable ...string) ([]tostructs.Type, error) {
+func (to *Session) Types(useInTable ...string) ([]toapi.Type, error) {
 
 	if len(useInTable) > 1 {
 		return nil, errors.New("Please pass in a single value for the 'useInTable' parameter")
@@ -37,12 +37,12 @@ func (to *Session) Types(useInTable ...string) ([]tostructs.Type, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.TypeResponse
+	var data toapi.TypeResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 
-	var types []tostructs.Type
+	var types []toapi.Type
 	for _, d := range data.Response {
 		if useInTable != nil {
 			if d.UseInTable == useInTable[0] {

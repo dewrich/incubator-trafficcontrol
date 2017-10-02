@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -31,8 +31,8 @@ type ServersDetailResponse struct {
 type Server struct {
 	Cachegroup     string `json:"cachegroup" db:"cachegroup"`
 	CachegroupID   int    `json:"cachegroupId" db:"cachegroup_id"`
-	CdnID          int    `json:"cdnId" db:"cdn_id"`
-	CdnName        string `json:"cdnName" db:"cdn_name"`
+	CDNID          int    `json:"cdnId" db:"cdn_id"`
+	CDNName        string `json:"cdnName" db:"cdn_name"`
 	DomainName     string `json:"domainName" db:"domain_name"`
 	GUID           string `json:"guid" db:"guid"`
 	HostName       string `json:"hostName" db:"host_name"`
@@ -67,8 +67,8 @@ type Server struct {
 	Status         string `json:"status" db:"status"`
 	StatusID       int    `json:"statusId" db:"status_id"`
 	TCPPort        int    `json:"tcpPort" db:"tcp_port"`
-	ServerType     string `json:"type" db:"server_type"`
-	ServerTypeID   int    `json:"typeId" db:"server_type_id"`
+	Type           string `json:"type" db:"server_type"`
+	TypeID         int    `json:"typeId" db:"server_type_id"`
 	UpdPending     bool   `json:"updPending" db:"upd_pending"`
 	XMPPID         string `json:"xmppId" db:"xmpp_id"`
 	XMPPPasswd     string `json:"xmppPasswd" db:"xmpp_passwd"`

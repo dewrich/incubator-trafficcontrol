@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,15 +19,14 @@ package tostructs
  * under the License.
  */
 
-// TypeResponse ...
-type TypeResponse struct {
-	Response []Type `json:"response"`
+type CDNsResponse struct {
+	Response []CDN `json:"response"`
 }
 
-// Type contains information about a given Type in Traffic Ops.
-type Type struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	UseInTable  string `json:"useInTable,omitempty"`
+type CDN struct {
+	DNSSECEnabled bool   `json:"dnssecEnabled" db:"dnssec_enabled"`
+	DomainName    string `json:"domainName" db:"domain_name"`
+	ID            int    `json:"id" db:"id"`
+	LastUpdated   string `json:"lastUpdated" db:"last_updated"`
+	Name          string `json:"name" db:"name"`
 }

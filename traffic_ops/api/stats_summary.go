@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,15 +19,25 @@ package tostructs
  * under the License.
  */
 
-// ProfileResponse ...
-type ProfilesResponse struct {
-	Response []Profile `json:"response"`
+// StatsSummaryResponse ...
+type StatsSummaryResponse struct {
+	Response []StatsSummary `json:"response"`
 }
 
-// Profile ...
-type Profile struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	LastUpdated string `json:"lastUpdated"`
+// StatsSummary ...
+type StatsSummary struct {
+	CDNName         string `json:"cdnName"`
+	DeliveryService string `json:"deliveryServiceName"`
+	StatName        string `json:"statName"`
+	StatValue       string `json:"statValue"`
+	SummaryTime     string `json:"summaryTime"`
+	StatDate        string `json:"statDate"`
+}
+
+// LastUpdated ...
+type LastUpdated struct {
+	Version  string `json:"version"`
+	Response struct {
+		SummaryTime string `json:"summaryTime"`
+	} `json:"response"`
 }

@@ -18,12 +18,12 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // CacheGroups gets the CacheGroups in an array of CacheGroup structs
 // (note CacheGroup used to be called location)
-func (to *Session) CacheGroups() ([]tostructs.CacheGroup, error) {
+func (to *Session) CacheGroups() ([]toapi.CacheGroup, error) {
 	url := "/api/1.2/cachegroups.json"
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -31,7 +31,7 @@ func (to *Session) CacheGroups() ([]tostructs.CacheGroup, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.CacheGroupsResponse
+	var data toapi.CacheGroupsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

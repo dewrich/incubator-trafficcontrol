@@ -23,16 +23,16 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/test"
 	"github.com/jmoiron/sqlx"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func getTestRegions() []tostructs.Region {
-	regions := []tostructs.Region{}
-	testCase := tostructs.Region{
+func getTestRegions() []toapi.Region {
+	regions := []toapi.Region{}
+	testCase := toapi.Region{
 		Division:    1,
 		ID:          1,
 		Name:        "region1",
@@ -57,7 +57,7 @@ func TestGetRegions(t *testing.T) {
 	defer db.Close()
 
 	testCase := getTestRegions()
-	cols := test.ColsFromStructByTag("db", tostructs.Region{})
+	cols := test.ColsFromStructByTag("db", toapi.Region{})
 	rows := sqlmock.NewRows(cols)
 
 	for _, ts := range testCase {
@@ -83,7 +83,7 @@ func TestGetRegions(t *testing.T) {
 
 }
 
-type SortableRegions []tostructs.Region
+type SortableRegions []toapi.Region
 
 func (s SortableRegions) Len() int {
 	return len(s)

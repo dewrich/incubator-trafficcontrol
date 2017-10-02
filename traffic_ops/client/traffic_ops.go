@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 
 	"golang.org/x/net/publicsuffix"
 )
@@ -82,7 +82,7 @@ const tmPollingInterval = 60
 
 // loginCreds gathers login credentials for Traffic Ops.
 func loginCreds(toUser string, toPasswd string) ([]byte, error) {
-	credentials := tostructs.UserCredentials{
+	credentials := toapi.UserCredentials{
 		Username: toUser,
 		Password: toPasswd,
 	}
@@ -134,7 +134,7 @@ func LoginWithAgent(toURL string, toUser string, toPasswd string, insecure bool,
 	}
 	defer resp.Body.Close()
 
-	var r tostructs.Response
+	var r toapi.Response
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		return nil, err
 	}

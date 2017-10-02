@@ -18,11 +18,11 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // Profiles gets an array of Profiles
-func (to *Session) Profiles() ([]tostructs.Profile, error) {
+func (to *Session) Profiles() ([]toapi.Profile, error) {
 	url := "/api/1.2/profiles.json"
 	resp, err := to.request("GET", url, nil)
 	if err != nil {
@@ -30,7 +30,7 @@ func (to *Session) Profiles() ([]tostructs.Profile, error) {
 	}
 	defer resp.Body.Close()
 
-	var data tostructs.ProfilesResponse
+	var data toapi.ProfilesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}

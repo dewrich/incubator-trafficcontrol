@@ -26,7 +26,7 @@ import (
 	"net/url"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/common/log"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -62,19 +62,19 @@ func regionsHandler(db *sqlx.DB) AuthRegexHandlerFunc {
 	}
 }
 
-func getRegionsResponse(q url.Values, db *sqlx.DB, privLevel int) (*tostructs.RegionsResponse, error) {
+func getRegionsResponse(q url.Values, db *sqlx.DB, privLevel int) (*toapi.RegionsResponse, error) {
 	regions, err := getRegions(q, db, privLevel)
 	if err != nil {
 		return nil, fmt.Errorf("getting regions response: %v", err)
 	}
 
-	resp := tostructs.RegionsResponse{
+	resp := toapi.RegionsResponse{
 		Response: regions,
 	}
 	return &resp, nil
 }
 
-func getRegions(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.Region, error) {
+func getRegions(v url.Values, db *sqlx.DB, privLevel int) ([]toapi.Region, error) {
 
 	var rows *sqlx.Rows
 	var err error
@@ -94,11 +94,11 @@ func getRegions(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.Region, e
 	if err != nil {
 		return nil, err
 	}
-	regions := []tostructs.Region{}
+	regions := []toapi.Region{}
 
 	defer rows.Close()
 	for rows.Next() {
-		var s tostructs.Region
+		var s toapi.Region
 		if err = rows.StructScan(&s); err != nil {
 			return nil, fmt.Errorf("getting regions: %v", err)
 		}

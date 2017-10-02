@@ -18,12 +18,12 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 )
 
 // DeliveryServices gets an array of DeliveryServices
-func (to *Session) DeliveryServices() ([]tostructs.DeliveryService, error) {
-	var data tostructs.GetDeliveryServiceResponse
+func (to *Session) DeliveryServices() ([]toapi.DeliveryService, error) {
+	var data toapi.GetDeliveryServiceResponse
 	err := get(to, deliveryServicesEp(), &data)
 	if err != nil {
 		return nil, err
@@ -33,8 +33,8 @@ func (to *Session) DeliveryServices() ([]tostructs.DeliveryService, error) {
 }
 
 // DeliveryService gets the DeliveryService for the ID it's passed
-func (to *Session) DeliveryService(id string) (*tostructs.DeliveryService, error) {
-	var data tostructs.GetDeliveryServiceResponse
+func (to *Session) DeliveryService(id string) (*toapi.DeliveryService, error) {
+	var data toapi.GetDeliveryServiceResponse
 	err := get(to, deliveryServiceEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -44,8 +44,8 @@ func (to *Session) DeliveryService(id string) (*tostructs.DeliveryService, error
 }
 
 // CreateDeliveryService creates the DeliveryService it's passed
-func (to *Session) CreateDeliveryService(ds *tostructs.DeliveryService) (*tostructs.CreateDeliveryServiceResponse, error) {
-	var data tostructs.CreateDeliveryServiceResponse
+func (to *Session) CreateDeliveryService(ds *toapi.DeliveryService) (*toapi.CreateDeliveryServiceResponse, error) {
+	var data toapi.CreateDeliveryServiceResponse
 	jsonReq, err := json.Marshal(ds)
 	if err != nil {
 		return nil, err
@@ -60,8 +60,8 @@ func (to *Session) CreateDeliveryService(ds *tostructs.DeliveryService) (*tostru
 
 // UpdateDeliveryService updates the DeliveryService matching the ID it's passed with
 // the DeliveryService it is passed
-func (to *Session) UpdateDeliveryService(id string, ds *tostructs.DeliveryService) (*tostructs.UpdateDeliveryServiceResponse, error) {
-	var data tostructs.UpdateDeliveryServiceResponse
+func (to *Session) UpdateDeliveryService(id string, ds *toapi.DeliveryService) (*toapi.UpdateDeliveryServiceResponse, error) {
+	var data toapi.UpdateDeliveryServiceResponse
 	jsonReq, err := json.Marshal(ds)
 	if err != nil {
 		return nil, err
@@ -75,8 +75,8 @@ func (to *Session) UpdateDeliveryService(id string, ds *tostructs.DeliveryServic
 }
 
 // DeleteDeliveryService deletes the DeliveryService matching the ID it's passed
-func (to *Session) DeleteDeliveryService(id string) (*tostructs.DeleteDeliveryServiceResponse, error) {
-	var data tostructs.DeleteDeliveryServiceResponse
+func (to *Session) DeleteDeliveryService(id string) (*toapi.DeleteDeliveryServiceResponse, error) {
+	var data toapi.DeleteDeliveryServiceResponse
 	err := del(to, deliveryServiceEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -86,8 +86,8 @@ func (to *Session) DeleteDeliveryService(id string) (*tostructs.DeleteDeliverySe
 }
 
 // DeliveryServiceState gets the DeliveryServiceState for the ID it's passed
-func (to *Session) DeliveryServiceState(id string) (*tostructs.DeliveryServiceState, error) {
-	var data tostructs.DeliveryServiceStateResponse
+func (to *Session) DeliveryServiceState(id string) (*toapi.DeliveryServiceState, error) {
+	var data toapi.DeliveryServiceStateResponse
 	err := get(to, deliveryServiceStateEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -97,8 +97,8 @@ func (to *Session) DeliveryServiceState(id string) (*tostructs.DeliveryServiceSt
 }
 
 // DeliveryServiceHealth gets the DeliveryServiceHealth for the ID it's passed
-func (to *Session) DeliveryServiceHealth(id string) (*tostructs.DeliveryServiceHealth, error) {
-	var data tostructs.DeliveryServiceHealthResponse
+func (to *Session) DeliveryServiceHealth(id string) (*toapi.DeliveryServiceHealth, error) {
+	var data toapi.DeliveryServiceHealthResponse
 	err := get(to, deliveryServiceHealthEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -108,8 +108,8 @@ func (to *Session) DeliveryServiceHealth(id string) (*tostructs.DeliveryServiceH
 }
 
 // DeliveryServiceCapacity gets the DeliveryServiceCapacity for the ID it's passed
-func (to *Session) DeliveryServiceCapacity(id string) (*tostructs.DeliveryServiceCapacity, error) {
-	var data tostructs.DeliveryServiceCapacityResponse
+func (to *Session) DeliveryServiceCapacity(id string) (*toapi.DeliveryServiceCapacity, error) {
+	var data toapi.DeliveryServiceCapacityResponse
 	err := get(to, deliveryServiceCapacityEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -119,8 +119,8 @@ func (to *Session) DeliveryServiceCapacity(id string) (*tostructs.DeliveryServic
 }
 
 // DeliveryServiceRouting gets the DeliveryServiceRouting for the ID it's passed
-func (to *Session) DeliveryServiceRouting(id string) (*tostructs.DeliveryServiceRouting, error) {
-	var data tostructs.DeliveryServiceRoutingResponse
+func (to *Session) DeliveryServiceRouting(id string) (*toapi.DeliveryServiceRouting, error) {
+	var data toapi.DeliveryServiceRoutingResponse
 	err := get(to, deliveryServiceRoutingEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -130,8 +130,8 @@ func (to *Session) DeliveryServiceRouting(id string) (*tostructs.DeliveryService
 }
 
 // DeliveryServiceServer gets the DeliveryServiceServer
-func (to *Session) DeliveryServiceServer(page, limit string) ([]tostructs.DeliveryServiceServer, error) {
-	var data tostructs.DeliveryServiceServerResponse
+func (to *Session) DeliveryServiceServer(page, limit string) ([]toapi.DeliveryServiceServer, error) {
+	var data toapi.DeliveryServiceServerResponse
 	err := get(to, deliveryServiceServerEp(page, limit), &data)
 	if err != nil {
 		return nil, err
@@ -141,8 +141,8 @@ func (to *Session) DeliveryServiceServer(page, limit string) ([]tostructs.Delive
 }
 
 // DeliveryServiceSSLKeysByID gets the DeliveryServiceSSLKeys by ID
-func (to *Session) DeliveryServiceSSLKeysByID(id string) (*tostructs.DeliveryServiceSSLKeys, error) {
-	var data tostructs.DeliveryServiceSSLKeysResponse
+func (to *Session) DeliveryServiceSSLKeysByID(id string) (*toapi.DeliveryServiceSSLKeys, error) {
+	var data toapi.DeliveryServiceSSLKeysResponse
 	err := get(to, deliveryServiceSSLKeysByIDEp(id), &data)
 	if err != nil {
 		return nil, err
@@ -152,8 +152,8 @@ func (to *Session) DeliveryServiceSSLKeysByID(id string) (*tostructs.DeliverySer
 }
 
 // DeliveryServiceSSLKeysByHostname gets the DeliveryServiceSSLKeys by Hostname
-func (to *Session) DeliveryServiceSSLKeysByHostname(hostname string) (*tostructs.DeliveryServiceSSLKeys, error) {
-	var data tostructs.DeliveryServiceSSLKeysResponse
+func (to *Session) DeliveryServiceSSLKeysByHostname(hostname string) (*toapi.DeliveryServiceSSLKeys, error) {
+	var data toapi.DeliveryServiceSSLKeysResponse
 	err := get(to, deliveryServiceSSLKeysByHostnameEp(hostname), &data)
 	if err != nil {
 		return nil, err

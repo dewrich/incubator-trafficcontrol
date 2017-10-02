@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,14 +19,13 @@ package tostructs
  * under the License.
  */
 
-type CDNsResponse struct {
-	Response []CDN `json:"response"`
+type ASNsResponse struct {
+	Response []ASN `json:"response"`
 }
 
-type CDN struct {
-	DNSSECEnabled bool   `json:"dnssecEnabled" db:"dnssec_enabled"`
-	DomainName    string `json:"domainName" db:"domain_name"`
-	ID            int    `json:"id" db:"id"`
-	LastUpdated   string `json:"lastUpdated" db:"last_updated"`
-	Name          string `json:"name" db:"name"`
+type ASN struct {
+	ASN         int    `json:"asn" db:"asn"`
+	Cachegroup  int    `json:"cachegroup" db:"cachegroup"`
+	ID          int    `json:"id" db:"id"`
+	LastUpdated string `json:"lastUpdated" db:"last_updated"`
 }

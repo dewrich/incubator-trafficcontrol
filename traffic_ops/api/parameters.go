@@ -1,4 +1,4 @@
-package tostructs
+package api
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,13 +19,15 @@ package tostructs
  * under the License.
  */
 
-type ASNsResponse struct {
-	Response []ASN `json:"response"`
+// ParamResponse ...
+type ParamResponse struct {
+	Response []Parameter `json:"response"`
 }
 
-type ASN struct {
-	ASN         int    `json:"asn" db:"asn"`
-	Cachegroup  int    `json:"cachegroup" db:"cachegroup"`
-	ID          int    `json:"id" db:"id"`
-	LastUpdated string `json:"lastUpdated" db:"last_updated"`
+// Parameter ...
+type Parameter struct {
+	Name        string `json:"name"`
+	ConfigFile  string `json:"configFile"`
+	Value       string `json:"Value"`
+	LastUpdated string `json:"lastUpdated"`
 }

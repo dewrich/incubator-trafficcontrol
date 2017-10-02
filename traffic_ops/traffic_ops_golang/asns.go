@@ -26,7 +26,7 @@ import (
 	"net/url"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_monitor_golang/common/log"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs"
+	toapi "github.com/apache/incubator-trafficcontrol/traffic_ops/api"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -62,19 +62,19 @@ func ASNsHandler(db *sqlx.DB) AuthRegexHandlerFunc {
 	}
 }
 
-func getASNsResponse(q url.Values, db *sqlx.DB, privLevel int) (*tostructs.ASNsResponse, error) {
+func getASNsResponse(q url.Values, db *sqlx.DB, privLevel int) (*toapi.ASNsResponse, error) {
 	asns, err := getASNs(q, db, privLevel)
 	if err != nil {
 		return nil, fmt.Errorf("getting asns response: %v", err)
 	}
 
-	resp := tostructs.ASNsResponse{
+	resp := toapi.ASNsResponse{
 		Response: asns,
 	}
 	return &resp, nil
 }
 
-func getASNs(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.ASN, error) {
+func getASNs(v url.Values, db *sqlx.DB, privLevel int) ([]toapi.ASN, error) {
 
 	var rows *sqlx.Rows
 	var err error
@@ -94,11 +94,11 @@ func getASNs(v url.Values, db *sqlx.DB, privLevel int) ([]tostructs.ASN, error) 
 	if err != nil {
 		return nil, err
 	}
-	ASNs := []tostructs.ASN{}
+	ASNs := []toapi.ASN{}
 
 	defer rows.Close()
 	for rows.Next() {
-		var s tostructs.ASN
+		var s toapi.ASN
 		if err = rows.StructScan(&s); err != nil {
 			return nil, fmt.Errorf("getting ASNs: %v", err)
 		}
