@@ -94,13 +94,13 @@ Built: %(date) by %{getenv: USER}
     ) || { echo "Could not build go Traffic Ops client at $(pwd): $!"; exit 1; }
 
     # build TO structs (dependencies within traffic_control will fail to `go get` unless prebuilt)
-    godir=src/github.com/apache/incubator-trafficcontrol/traffic_ops/tostructs
+    godir=src/github.com/apache/incubator-trafficcontrol/traffic_ops/api
     ( mkdir -p "$godir" && \
       cd "$godir" && \
-      cp -r "$TC_DIR"/traffic_ops/tostructs/* . && \
+      cp -r "$TC_DIR"/traffic_ops/api/* . && \
       echo "go getting log at $(pwd)" && \
       go get -v \
-    ) || { echo "Could not build go Traffic Ops tostructs at $(pwd): $!"; exit 1; }
+    ) || { echo "Could not build go Traffic Ops api structs at $(pwd): $!"; exit 1; }
 
 
 
