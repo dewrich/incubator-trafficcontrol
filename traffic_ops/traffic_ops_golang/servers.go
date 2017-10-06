@@ -20,22 +20,18 @@ package main
  */
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/apache/incubator-trafficcontrol.wip/traffic_ops/traffic_ops_golang/api"
-	"github.com/apache/incubator-trafficcontrol/lib/go-log"
-	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
-
-	"github.com/jmoiron/sqlx"
-
-	"database/sql"
 	"strings"
 
+	"github.com/apache/incubator-trafficcontrol/lib/go-log"
+	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/ats"
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
 
@@ -69,7 +65,7 @@ func serversHandler(db *sqlx.DB) AuthRegexHandlerFunc {
 			return
 		}
 
-		w.Header().Set(api.ContentType, api.ApplicationJson)
+		w.Header().Set(tc.ContentType, tc.ApplicationJson)
 		fmt.Fprintf(w, "%s", respBts)
 	}
 }
