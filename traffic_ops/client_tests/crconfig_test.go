@@ -20,7 +20,7 @@ import "testing"
 //TestCachegroupResults compares the results of the Cachegroup api and Cachegroup client
 func TestGetCrConfig(t *testing.T) {
 	//Get a CDN from the to client
-	cdn, err := GetCdn()
+	cdn, err := GetCDN()
 	if err != nil {
 		t.Errorf("TestGetCrConfig -- Could not get CDNs from TO...%v\n", err)
 	}

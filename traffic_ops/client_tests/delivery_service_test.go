@@ -37,7 +37,7 @@ var (
 )
 
 func init() {
-	cdn, err := GetCdn()
+	cdn, err := GetCDN()
 	if err != nil {
 		fmt.Printf("Deliverservice_test init -- Could not get CDNs from TO...%v\n", err)
 		os.Exit(1)

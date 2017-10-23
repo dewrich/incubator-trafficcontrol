@@ -48,8 +48,8 @@ func init() {
 	log.Debugln("%v-->", toURL)
 }
 
-//GetCdn returns a Cdn struct
-func GetCdn() (tc.CDN, error) {
+//GetCDN returns a Cdn struct
+func GetCDN() (tc.CDN, error) {
 	cdns, err := to.CDNs()
 	if err != nil {
 		return *new(tc.CDN), err

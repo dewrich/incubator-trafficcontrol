@@ -65,7 +65,7 @@ func TestStatsSummaryAll(t *testing.T) {
 }
 
 func TestStatsSummarybyCDN(t *testing.T) {
-	cdn, err := GetCdn()
+	cdn, err := GetCDN()
 	if err != nil {
 		t.Error("Could not get a CDN, response was %v\n", err)
 		t.FailNow()
@@ -192,7 +192,7 @@ func TestStatsSummaryByStatName(t *testing.T) {
 }
 
 func TestAddSummaryStats(t *testing.T) {
-	cdn, err := GetCdn()
+	cdn, err := GetCDN()
 	if err != nil {
 		t.Errorf("Could not get a CDN, response was %v\n", err)
 		t.FailNow()

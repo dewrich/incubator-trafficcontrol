@@ -24,7 +24,7 @@ import (
 )
 
 func TestTrafficMonitorConfig(t *testing.T) {
-	cdn, err := GetCdn()
+	cdn, err := GetCDN()
 	if err != nil {
 		t.Errorf("Could not get CDN, error was: %v\n", err)
 	}
