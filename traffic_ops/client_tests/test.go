@@ -14,13 +14,14 @@
    limitations under the License.
 */
 
-package client
+package client_tests
 
 import (
+	"flag"
 	"fmt"
 	"testing"
 
-	"github.com/cihub/seelog"
+	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
 )
 
 // Succeed is the Unicode codepoint for a check mark.
@@ -30,16 +31,21 @@ const Succeed = "\u2713"
 const Failed = "\u2717"
 
 func init() {
-	// An example seelog.xml is located at conf/seelog.xml
-	// If you want to use this config - copy it to your project
-	seelogConfig := "conf/seelog.xml.test"
-	logger, err := seelog.LoggerFromConfigAsFile(seelogConfig)
-	if err != nil {
-		err := fmt.Errorf("FOO Error creating Logger from seelog file: %s", seelogConfig)
-		seelog.Error(err)
+
+	var cfg Config
+	var err error
+	var errorToLog error
+	configFileName := flag.String("cfg", "", "The config file path")
+	dbConfigFileName := flag.String("dbcfg", "", "The db config file path")
+	if cfg, err = LoadConfig(*configFileName, *dbConfigFileName); err != nil {
+		errorToLog = err
 	}
-	defer seelog.Flush()
-	seelog.ReplaceLogger(logger)
+
+	if err := log.InitCfg(cfg); err != nil {
+		fmt.Printf("Error initializing loggers: %v\n", err)
+		return
+	}
+	log.Warnln(errorToLog)
 }
 
 // Context is a summary of the test being run.
@@ -63,4 +69,27 @@ func Error(t *testing.T, msg string, args ...interface{}) {
 func Success(t *testing.T, msg string, args ...interface{}) {
 	m := fmt.Sprintf(msg, args...)
 	t.Log(fmt.Sprintf("\t %-80s", m), Succeed)
+}
+
+// ErrorLog - critical messages
+func (c Config) ErrorLog() log.LogLocation {
+	return log.LogLocation(c.LogLocationError)
+}
+
+// WarningLog - warning messages
+func (c Config) WarningLog() log.LogLocation {
+	return log.LogLocation(c.LogLocationWarning)
+}
+
+// InfoLog - information messages
+func (c Config) InfoLog() log.LogLocation { return log.LogLocation(c.LogLocationInfo) }
+
+// DebugLog - troubleshooting messages
+func (c Config) DebugLog() log.LogLocation {
+	return log.LogLocation(c.LogLocationDebug)
+}
+
+// EventLog - access.log high level transactions
+func (c Config) EventLog() log.LogLocation {
+	return log.LogLocation(c.LogLocationEvent)
 }

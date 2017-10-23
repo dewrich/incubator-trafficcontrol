@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package client
+package client_tests
 
 import (
 	"encoding/json"
