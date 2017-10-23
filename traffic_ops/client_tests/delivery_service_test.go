@@ -13,7 +13,7 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
@@ -25,15 +25,15 @@ import (
 	"testing"
 	"time"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 var (
-	testDs           traffic_ops.DeliveryService
+	testDs           tc.DeliveryService
 	testDsID         string
-	existingTestDS   traffic_ops.DeliveryService
+	existingTestDS   tc.DeliveryService
 	existingTestDSID string
-	sslDs            traffic_ops.DeliveryService
+	sslDs            tc.DeliveryService
 )
 
 func init() {
@@ -103,12 +103,12 @@ func init() {
 	testDs.LogsEnabled = false
 
 	//Create method currently does not support MatchList...
-	// testDsMatch1 := new(traffic_ops.DeliveryServiceMatch)
+	// testDsMatch1 := new(tc.DeliveryServiceMatch)
 	// testDsMatch1.Pattern = "Pattern1"
 	// testDsMatch1.SetNumber = "0"
 	// testDsMatch1.Type = "HOST"
 
-	// testDsMatch2 := new(traffic_ops.DeliveryServiceMatch)
+	// testDsMatch2 := new(tc.DeliveryServiceMatch)
 	// testDsMatch2.Pattern = "Pattern2"
 	// testDsMatch2.SetNumber = "1"
 	// testDsMatch2.Type = "HOST"
@@ -125,7 +125,7 @@ func TestDeliveryServices(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsRes traffic_ops.GetDeliveryServiceResponse
+	var apiDsRes tc.GetDeliveryServiceResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsRes); err != nil {
 		t.Errorf("Could not decode Deliveryservice json.  Error is: %v\n", err)
 	}
@@ -210,7 +210,7 @@ func TestDeliveryService(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsRes traffic_ops.GetDeliveryServiceResponse
+	var apiDsRes tc.GetDeliveryServiceResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsRes); err != nil {
 		t.Errorf("Could not decode Deliveryservice json.  Error is: %v\n", err)
 	}
@@ -249,7 +249,7 @@ func TestDeliveryServiceState(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsStateRes traffic_ops.DeliveryServiceStateResponse
+	var apiDsStateRes tc.DeliveryServiceStateResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsStateRes); err != nil {
 		t.Errorf("Could not decode DeliveryserviceState reponse.  Error is: %v\n", err)
 	}
@@ -289,7 +289,7 @@ func TestDeliveryServiceHealth(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsHealthRes traffic_ops.DeliveryServiceHealthResponse
+	var apiDsHealthRes tc.DeliveryServiceHealthResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsHealthRes); err != nil {
 		t.Errorf("Could not decode DeliveryserviceHealth reponse.  Error is: %v\n", err)
 	}
@@ -341,7 +341,7 @@ func TestDeliveryServiceCapacity(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsCapacityRes traffic_ops.DeliveryServiceCapacityResponse
+	var apiDsCapacityRes tc.DeliveryServiceCapacityResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsCapacityRes); err != nil {
 		t.Errorf("Could not decode DeliveryserviceCapacity reponse.  Error is: %v\n", err)
 	}
@@ -387,7 +387,7 @@ func TestDeliveryServiceRouting(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsRoutingRes traffic_ops.DeliveryServiceRoutingResponse
+	var apiDsRoutingRes tc.DeliveryServiceRoutingResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsRoutingRes); err != nil {
 		t.Errorf("Could not decode DeliveryserviceRouting reponse.  Error is: %v\n", err)
 	}
@@ -439,7 +439,7 @@ func TestDeliveryServiceServer(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiDsServerRes traffic_ops.DeliveryServiceServerResponse
+	var apiDsServerRes tc.DeliveryServiceServerResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiDsServerRes); err != nil {
 		t.Errorf("Could not decode DeliveryserviceServer reponse.  Error is: %v\n", err)
 	}
@@ -480,7 +480,7 @@ func TestDeliveryServiceSSLKeysByID(t *testing.T) {
 		}
 
 		defer resp.Body.Close()
-		var apiSslRes traffic_ops.DeliveryServiceSSLKeysResponse
+		var apiSslRes tc.DeliveryServiceSSLKeysResponse
 		if err := json.NewDecoder(resp.Body).Decode(&apiSslRes); err != nil {
 			t.Errorf("Could not decode DeliveryServiceSSLKeysResponse reponse.  Error is: %v\n", err)
 		}
@@ -521,7 +521,7 @@ func TestDeliveryServiceSSLKeysByHostname(t *testing.T) {
 		}
 
 		defer resp.Body.Close()
-		var apiSslRes traffic_ops.DeliveryServiceSSLKeysResponse
+		var apiSslRes tc.DeliveryServiceSSLKeysResponse
 		if err := json.NewDecoder(resp.Body).Decode(&apiSslRes); err != nil {
 			t.Errorf("Could not decode DeliveryServiceSSLKeysResponse reponse.  Error is: %v\n", err)
 		}
@@ -537,7 +537,7 @@ func TestDeliveryServiceSSLKeysByHostname(t *testing.T) {
 	}
 }
 
-func compareDs(ds1 traffic_ops.DeliveryService, ds2 traffic_ops.DeliveryService, t *testing.T) {
+func compareDs(ds1 tc.DeliveryService, ds2 tc.DeliveryService, t *testing.T) {
 	if ds1.Active != ds1.Active {
 		t.Errorf("Active -- Expected %v, Got %v\n", ds1.Active, ds2.Active)
 	}
@@ -686,7 +686,7 @@ func compareDs(ds1 traffic_ops.DeliveryService, ds2 traffic_ops.DeliveryService,
 	}
 }
 
-func compareSSLResponse(apiSslRes traffic_ops.DeliveryServiceSSLKeys, clientSslRes traffic_ops.DeliveryServiceSSLKeys, t *testing.T) {
+func compareSSLResponse(apiSslRes tc.DeliveryServiceSSLKeys, clientSslRes tc.DeliveryServiceSSLKeys, t *testing.T) {
 	if apiSslRes.BusinessUnit != clientSslRes.BusinessUnit {
 		t.Errorf("BusinessUnit -- Expected %v got %v", apiSslRes.BusinessUnit, clientSslRes.BusinessUnit)
 	}

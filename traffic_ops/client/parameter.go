@@ -23,7 +23,7 @@ import (
 )
 
 // Parameters gets an array of parameter structs for the profile given
-func (to *Session) Parameters(profileName string) ([]tc.Parameter, error) {
+func (to *Session) ParametersProfile(profileName string) ([]tc.Parameter, error) {
 	url := fmt.Sprintf("/api/1.2/parameters/profile/%s.json", profileName)
 	resp, err := to.request("GET", url, nil)
 	if err != nil {

@@ -13,7 +13,7 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import "testing"
 

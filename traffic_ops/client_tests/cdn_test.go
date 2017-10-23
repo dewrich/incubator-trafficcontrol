@@ -13,13 +13,13 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 //TestCDNs compares the results of the CDN api and CDN client
@@ -31,7 +31,7 @@ func TestCDNs(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiCDNRes traffic_ops.CDNResponse
+	var apiCDNRes tc.CDNsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiCDNRes); err != nil {
 		t.Errorf("Could not decode CDN json.  Error is: %v\n", err)
 	}
@@ -77,7 +77,7 @@ func TestCDNName(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiCDNRes traffic_ops.CDNResponse
+	var apiCDNRes tc.CDNsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiCDNRes); err != nil {
 		t.Errorf("Could not decode CDN json.  Error is: %v\n", err)
 	}

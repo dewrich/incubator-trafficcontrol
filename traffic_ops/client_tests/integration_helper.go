@@ -13,7 +13,7 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"bytes"
@@ -24,11 +24,13 @@ import (
 	"os"
 	"time"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
 )
 
 var (
-	to *traffic_ops.Session
+	to *client.Session
 )
 
 func init() {
@@ -38,18 +40,19 @@ func init() {
 	flag.Parse()
 	var loginErr error
 	toReqTimeout := time.Second * time.Duration(30)
-	to, loginErr = traffic_ops.LoginWithAgent(*toURL, *toUser, *toPass, true, "traffic-ops-client-integration-tests", true, toReqTimeout)
+	to, loginErr = client.LoginWithAgent(*toURL, *toUser, *toPass, true, "traffic-ops-client-integration-tests", true, toReqTimeout)
 	if loginErr != nil {
 		fmt.Printf("\nError logging in to %v: %v\nMake sure toURL, toUser, and toPass flags are included and correct.\nExample:  go test -toUser=admin -toPass=pass -toURL=http://localhost:3000\n\n", *toURL, loginErr)
 		os.Exit(1)
 	}
+	log.Debugln("%v-->", toURL)
 }
 
 //GetCdn returns a Cdn struct
-func GetCdn() (traffic_ops.CDN, error) {
+func GetCdn() (tc.CDN, error) {
 	cdns, err := to.CDNs()
 	if err != nil {
-		return *new(traffic_ops.CDN), err
+		return *new(tc.CDN), err
 	}
 	cdn := cdns[0]
 	if cdn.Name == "ALL" {
@@ -59,19 +62,19 @@ func GetCdn() (traffic_ops.CDN, error) {
 }
 
 //GetProfile returns a Profile Struct
-func GetProfile() (traffic_ops.Profile, error) {
+func GetProfile() (tc.Profile, error) {
 	profiles, err := to.Profiles()
 	if err != nil {
-		return *new(traffic_ops.Profile), err
+		return *new(tc.Profile), err
 	}
 	return profiles[0], nil
 }
 
 //GetType returns a Type Struct
-func GetType(useInTable string) (traffic_ops.Type, error) {
+func GetType(useInTable string) (tc.Type, error) {
 	types, err := to.Types()
 	if err != nil {
-		return *new(traffic_ops.Type), err
+		return *new(tc.Type), err
 	}
 	for _, myType := range types {
 		if myType.UseInTable == useInTable {
@@ -79,14 +82,14 @@ func GetType(useInTable string) (traffic_ops.Type, error) {
 		}
 	}
 	nfErr := fmt.Sprintf("No Types found for useInTable %s\n", useInTable)
-	return *new(traffic_ops.Type), errors.New(nfErr)
+	return *new(tc.Type), errors.New(nfErr)
 }
 
 //GetDeliveryService returns a DeliveryService Struct
-func GetDeliveryService(cdn string) (traffic_ops.DeliveryService, error) {
+func GetDeliveryService(cdn string) (tc.DeliveryService, error) {
 	dss, err := to.DeliveryServices()
 	if err != nil {
-		return *new(traffic_ops.DeliveryService), err
+		return *new(tc.DeliveryService), err
 	}
 	if cdn != "" {
 		for _, ds := range dss {
@@ -99,9 +102,9 @@ func GetDeliveryService(cdn string) (traffic_ops.DeliveryService, error) {
 }
 
 //Request sends a request to TO and returns a response.
-//This is basically a copy of the private "request" method in the traffic_ops.go \
+//This is basically a copy of the private "request" method in the tc.go \
 //but I didn't want to make that one public.
-func Request(to traffic_ops.Session, method, path string, body []byte) (*http.Response, error) {
+func Request(to client.Session, method, path string, body []byte) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", to.URL, path)
 
 	var req *http.Request
@@ -126,7 +129,7 @@ func Request(to traffic_ops.Session, method, path string, body []byte) (*http.Re
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		e := traffic_ops.HTTPError{
+		e := client.HTTPError{
 			HTTPStatus:     resp.Status,
 			HTTPStatusCode: resp.StatusCode,
 			URL:            url,

@@ -13,17 +13,17 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
-func TestParameters(t *testing.T) {
+func TestParametersProfile(t *testing.T) {
 	profile, err := GetProfile()
 	if err != nil {
 		t.Errorf("Could not get a profile, error was: %v\n", err)
@@ -37,14 +37,14 @@ func TestParameters(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiParamRes traffic_ops.ParamResponse
+	var apiParamRes tc.ParametersResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiParamRes); err != nil {
 		t.Errorf("Could not decode parameter json.  Error is: %v\n", err)
 		t.FailNow()
 	}
 	apiParams := apiParamRes.Response
 
-	clientParams, err := to.Parameters(profile.Name)
+	clientParams, err := to.ParametersProfile(profile.Name)
 	if err != nil {
 		t.Errorf("Could not get parameters from client.  Error is: %v\n", err)
 		t.FailNow()

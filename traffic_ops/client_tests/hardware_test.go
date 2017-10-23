@@ -13,13 +13,13 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 func TestHardware(t *testing.T) {
@@ -30,7 +30,7 @@ func TestHardware(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiHwRes traffic_ops.HardwareResponse
+	var apiHwRes tc.HardwareResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiHwRes); err != nil {
 		t.Errorf("Could not decode hwinfo json.  Error is: %v\n", err)
 		t.FailNow()
@@ -69,7 +69,7 @@ func TestHardwareWithLimit(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiHwRes traffic_ops.HardwareResponse
+	var apiHwRes tc.HardwareResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiHwRes); err != nil {
 		t.Errorf("Could not decode hwinfo json.  Error is: %v\n", err)
 		t.FailNow()
@@ -100,7 +100,7 @@ func TestHardwareWithLimit(t *testing.T) {
 	}
 }
 
-func compareHw(hw1 traffic_ops.Hardware, hw2 traffic_ops.Hardware, t *testing.T) {
+func compareHw(hw1 tc.Hardware, hw2 tc.Hardware, t *testing.T) {
 	if hw1.Description != hw2.Description {
 		t.Errorf("Description -- Expected %v, got %v", hw1.Description, hw2.Description)
 	}

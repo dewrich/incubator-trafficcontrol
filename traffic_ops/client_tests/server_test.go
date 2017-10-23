@@ -13,7 +13,7 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ import (
 	"net/url"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 func TestServers(t *testing.T) {
@@ -34,7 +34,7 @@ func TestServers(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiServerRes traffic_ops.ServerResponse
+	var apiServerRes tc.ServersResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiServerRes); err != nil {
 		t.Errorf("Could not decode server json.  Error is: %v\n", err)
 		t.FailNow()
@@ -79,7 +79,7 @@ func TestServersByType(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiServerRes traffic_ops.ServerResponse
+	var apiServerRes tc.ServersResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiServerRes); err != nil {
 		t.Errorf("Could not decode server json.  Error is: %v\n", err)
 		t.FailNow()
@@ -139,7 +139,7 @@ func TestServersFQDN(t *testing.T) {
 	}
 }
 
-func compareServer(server1 traffic_ops.Server, server2 traffic_ops.Server, t *testing.T) {
+func compareServer(server1 tc.Server, server2 tc.Server, t *testing.T) {
 	if server1.CDNName != server2.CDNName {
 		t.Errorf("CDNName -- Expected %v, got %v", server1.CDNName, server2.CDNName)
 	}
@@ -167,20 +167,20 @@ func compareServer(server1 traffic_ops.Server, server2 traffic_ops.Server, t *te
 	if server1.IPNetmask != server2.IPNetmask {
 		t.Errorf("IPNetmask -- Expected %v, got %v", server1.IPNetmask, server2.IPNetmask)
 	}
-	if server1.IloIPAddress != server2.IloIPAddress {
-		t.Errorf("IloIPAddress -- Expected %v, got %v", server1.IloIPAddress, server2.IloIPAddress)
+	if server1.ILOIPAddress != server2.ILOIPAddress {
+		t.Errorf("ILOIPAddress -- Expected %v, got %v", server1.ILOIPAddress, server2.ILOIPAddress)
 	}
-	if server1.IloIPGateway != server2.IloIPGateway {
-		t.Errorf("IloIPGateway -- Expected %v, got %v", server1.IloIPGateway, server2.IloIPGateway)
+	if server1.ILOIPGateway != server2.ILOIPGateway {
+		t.Errorf("ILOIPGateway -- Expected %v, got %v", server1.ILOIPGateway, server2.ILOIPGateway)
 	}
-	if server1.IloIPNetmask != server2.IloIPNetmask {
-		t.Errorf("IloIPNetmast -- Expected %v, got %v", server1.IloIPNetmask, server2.IloIPNetmask)
+	if server1.ILOIPNetmask != server2.ILOIPNetmask {
+		t.Errorf("ILOIPNetmast -- Expected %v, got %v", server1.ILOIPNetmask, server2.ILOIPNetmask)
 	}
-	if server1.IloPassword != server2.IloPassword {
-		t.Errorf("IloPassword -- Expected %v, got %v", server1.IloPassword, server2.IloPassword)
+	if server1.ILOPassword != server2.ILOPassword {
+		t.Errorf("ILOPassword -- Expected %v, got %v", server1.ILOPassword, server2.ILOPassword)
 	}
-	if server1.IloUsername != server2.IloUsername {
-		t.Errorf("IloUsername -- Expected %v, got %v", server1.IloUsername, server2.IloUsername)
+	if server1.ILOUsername != server2.ILOUsername {
+		t.Errorf("ILOUsername -- Expected %v, got %v", server1.ILOUsername, server2.ILOUsername)
 	}
 	if server1.InterfaceMtu != server2.InterfaceMtu {
 		t.Errorf("InterfaceMty -- Expected %v, got %v", server1.InterfaceMtu, server2.InterfaceMtu)

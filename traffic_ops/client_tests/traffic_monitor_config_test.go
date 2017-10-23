@@ -13,14 +13,14 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 func TestTrafficMonitorConfig(t *testing.T) {
@@ -36,7 +36,7 @@ func TestTrafficMonitorConfig(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiTMConfigRes traffic_ops.TMConfigResponse
+	var apiTMConfigRes tc.TMConfigResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiTMConfigRes); err != nil {
 		t.Errorf("Could not decode Traffic Monitor Config response.  Error is: %v\n", err)
 		t.FailNow()
@@ -175,8 +175,8 @@ func TestTrafficMonitorConfig(t *testing.T) {
 				if apiTS.Profile != clientTS.Profile {
 					t.Errorf("Profile -- Expected %v, got %v\n", apiTS.Profile, clientTS.Profile)
 				}
-				if apiTS.Status != clientTS.Status {
-					t.Errorf("Status -- Expected %v, got %v\n", apiTS.Status, clientTS.Status)
+				if apiTS.ServerStatus != clientTS.ServerStatus {
+					t.Errorf("Status -- Expected %v, got %v\n", apiTS.ServerStatus, clientTS.ServerStatus)
 				}
 				if apiTS.Type != clientTS.Type {
 					t.Errorf("Type -- Expected %v, got %v\n", apiTS.Type, clientTS.Type)

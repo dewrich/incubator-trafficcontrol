@@ -13,14 +13,14 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 func TestUsers(t *testing.T) {
@@ -33,7 +33,7 @@ func TestUsers(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiUserRes traffic_ops.UserResponse
+	var apiUserRes tc.UsersResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiUserRes); err != nil {
 		t.Errorf("Could not decode user json.  Error is: %v\n", err)
 		t.FailNow()

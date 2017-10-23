@@ -13,7 +13,7 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 func TestStatsSummaryAll(t *testing.T) {
@@ -34,7 +34,7 @@ func TestStatsSummaryAll(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiStatsSummaryRes traffic_ops.StatsSummaryResponse
+	var apiStatsSummaryRes tc.StatsSummaryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiStatsSummaryRes); err != nil {
 		t.Errorf("Could not decode stats summary json.  Error is: %v\n", err)
 		t.FailNow()
@@ -78,7 +78,7 @@ func TestStatsSummarybyCDN(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiStatsSummaryRes traffic_ops.StatsSummaryResponse
+	var apiStatsSummaryRes tc.StatsSummaryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiStatsSummaryRes); err != nil {
 		t.Errorf("Could not decode stats summary json.  Error is: %v\n", err)
 		t.FailNow()
@@ -122,7 +122,7 @@ func TestStatsSummaryByDs(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiStatsSummaryRes traffic_ops.StatsSummaryResponse
+	var apiStatsSummaryRes tc.StatsSummaryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiStatsSummaryRes); err != nil {
 		t.Errorf("Could not decode stats summary json.  Error is: %v\n", err)
 		t.FailNow()
@@ -161,7 +161,7 @@ func TestStatsSummaryByStatName(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiStatsSummaryRes traffic_ops.StatsSummaryResponse
+	var apiStatsSummaryRes tc.StatsSummaryResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiStatsSummaryRes); err != nil {
 		t.Errorf("Could not decode stats summary json.  Error is: %v\n", err)
 		t.FailNow()
@@ -206,7 +206,7 @@ func TestAddSummaryStats(t *testing.T) {
 	summaryTime := now.Format(time.RFC3339)
 	statDate := now.Format("2006-01-02")
 
-	testStatsSummay := new(traffic_ops.StatsSummary)
+	testStatsSummay := new(tc.StatsSummary)
 	testStatsSummay.CDNName = cdn.Name
 	testStatsSummay.DeliveryService = ds.XMLID
 	testStatsSummay.StatDate = statDate

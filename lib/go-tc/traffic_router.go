@@ -289,6 +289,11 @@ type TrafficRouter struct {
 	APIPort      int    `json:"apiPort"`
 }
 
+// TRConfigResponse ...
+type TRConfigResponse struct {
+	Response TrafficRouterConfig `json:"response"`
+}
+
 // TrafficRouterConfig is the json unmarshalled without any changes
 // note all structs are local to this file _except_ the TrafficRouterConfig struct.
 type TrafficRouterConfig struct {

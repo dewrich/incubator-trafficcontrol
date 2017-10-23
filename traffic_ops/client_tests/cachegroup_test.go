@@ -13,13 +13,13 @@
    limitations under the License.
 */
 
-package integration
+package client_tests
 
 import (
 	"encoding/json"
 	"testing"
 
-	traffic_ops "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 )
 
 //TestCachegroupResults compares the results of the Cachegroup api and Cachegroup client
@@ -31,7 +31,7 @@ func TestCachegroups(t *testing.T) {
 	}
 
 	defer resp.Body.Close()
-	var apiCgRes traffic_ops.CacheGroupResponse
+	var apiCgRes tc.CacheGroupsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiCgRes); err != nil {
 		t.Errorf("Could not decode Cachegroup json.  Error is: %v\n", err)
 	}
