@@ -16,63 +16,141 @@
 package client_tests
 
 import (
+	"bytes"
+	"errors"
+	"flag"
+	"fmt"
 	"net/http"
-	"testing"
+	"os"
+	"time"
 
+	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
 	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
 )
 
-func TestLogin(t *testing.T) {
-	resp := tc.Alerts{
-		Alerts: []tc.Alert{
-			tc.Alert{
-				Level: "success",
-				Text:  "Successfully logged in.",
-			},
-		},
+var (
+	to *client.Session
+)
+
+func init() {
+	toURL := flag.String("toURL", "http://localhost:3000", "Traffic Ops URL")
+	toUser := flag.String("toUser", "admin", "Traffic Ops user")
+	toPass := flag.String("toPass", "password", "Traffic Ops password")
+	flag.Parse()
+
+	var cfg Config
+	var err error
+	var errorToLog error
+	configFileName := flag.String("cfg", "", "The config file path")
+	dbConfigFileName := flag.String("dbcfg", "", "The db config file path")
+	if cfg, err = LoadConfig(*configFileName, *dbConfigFileName); err != nil {
+		errorToLog = err
 	}
 
-	server := ValidHTTPServer(resp)
-
-	Context(t, "Given the need to test a successful login to Traffic Ops")
-
-	session, err := client.Login(server.URL, "test", "password", true)
-	if err != nil {
-		Error(t, "Should be able to login")
-	} else {
-		Success(t, "Should be able to login")
+	if err := log.InitCfg(cfg); err != nil {
+		fmt.Printf("Error initializing loggers: %v\n", err)
+		return
 	}
-
-	if session.UserName != "test" {
-		Error(t, "Should get back \"test\" for \"UserName\", got %s", session.UserName)
-	} else {
-		Success(t, "Should get back \"test\" for \"UserName\"")
+	log.Warnln(errorToLog)
+	var loginErr error
+	toReqTimeout := time.Second * time.Duration(30)
+	to, loginErr = client.LoginWithAgent(*toURL, *toUser, *toPass, true, "traffic-ops-client-integration-tests", true, toReqTimeout)
+	if loginErr != nil {
+		fmt.Printf("\nError logging in to %v: %v\nMake sure toURL, toUser, and toPass flags are included and correct.\nExample:  go test -toUser=admin -toPass=pass -toURL=http://localhost:3000\n\n", *toURL, loginErr)
+		os.Exit(1)
 	}
-
-	if session.Password != "password" {
-		Error(t, "Should get back \"password\" for \"Password\", got %s", session.Password)
-	} else {
-		Success(t, "Should get back \"password\" for \"Password\"")
-	}
-
-	if session.URL != server.URL {
-		Error(t, "Should get back \"%s\" for \"URL\", got %s", server.URL, session.URL)
-	} else {
-		Success(t, "Should get back \"%s\" for \"URL\"", server.URL)
-	}
+	log.Debugln("%v-->", toURL)
 }
 
-func TestLoginUnauthorized(t *testing.T) {
-	server := InvalidHTTPServer(http.StatusUnauthorized)
-	defer server.Close()
-
-	Context(t, "Given the need to test an unsuccessful login to Traffic Ops")
-
-	_, err := client.Login(server.URL, "test", "password", true)
-	if err == nil {
-		Error(t, "Should not be able to login")
-	} else {
-		Success(t, "Should not be able to login")
+//GetCDN returns a Cdn struct
+func GetCDN() (tc.CDN, error) {
+	cdns, err := to.CDNs()
+	if err != nil {
+		return *new(tc.CDN), err
 	}
+	cdn := cdns[0]
+	if cdn.Name == "ALL" {
+		cdn = cdns[1]
+	}
+	return cdn, nil
+}
+
+//GetProfile returns a Profile Struct
+func GetProfile() (tc.Profile, error) {
+	profiles, err := to.Profiles()
+	if err != nil {
+		return *new(tc.Profile), err
+	}
+	return profiles[0], nil
+}
+
+//GetType returns a Type Struct
+func GetType(useInTable string) (tc.Type, error) {
+	types, err := to.Types()
+	if err != nil {
+		return *new(tc.Type), err
+	}
+	for _, myType := range types {
+		if myType.UseInTable == useInTable {
+			return myType, nil
+		}
+	}
+	nfErr := fmt.Sprintf("No Types found for useInTable %s\n", useInTable)
+	return *new(tc.Type), errors.New(nfErr)
+}
+
+//GetDeliveryService returns a DeliveryService Struct
+func GetDeliveryService(cdn string) (tc.DeliveryService, error) {
+	dss, err := to.DeliveryServices()
+	if err != nil {
+		return *new(tc.DeliveryService), err
+	}
+	if cdn != "" {
+		for _, ds := range dss {
+			if ds.CDNName == cdn {
+				return ds, nil
+			}
+		}
+	}
+	return dss[0], nil
+}
+
+//Request sends a request to TO and returns a response.
+//This is basically a copy of the private "request" method in the tc.go \
+//but I didn't want to make that one public.
+func Request(to client.Session, method, path string, body []byte) (*http.Response, error) {
+	url := fmt.Sprintf("%s%s", to.URL, path)
+
+	var req *http.Request
+	var err error
+
+	if body != nil && method != "GET" {
+		req, err = http.NewRequest(method, url, bytes.NewBuffer(body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+	} else {
+		req, err = http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	resp, err := to.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		e := client.HTTPError{
+			HTTPStatus:     resp.Status,
+			HTTPStatusCode: resp.StatusCode,
+			URL:            url,
+		}
+		return nil, &e
+	}
+
+	return resp, nil
 }
