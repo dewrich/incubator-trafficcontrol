@@ -37,16 +37,18 @@ func init() {
 	toURL := flag.String("toURL", "http://localhost:3000", "Traffic Ops URL")
 	toUser := flag.String("toUser", "admin", "Traffic Ops user")
 	toPass := flag.String("toPass", "password", "Traffic Ops password")
+
+	configFileName := flag.String("cfg", "", "The config file path")
+	dbConfigFileName := flag.String("dbcfg", "", "The db config file path")
 	flag.Parse()
 
 	var cfg Config
 	var err error
 	var errorToLog error
-	configFileName := flag.String("cfg", "", "The config file path")
-	dbConfigFileName := flag.String("dbcfg", "", "The db config file path")
 	if cfg, err = LoadConfig(*configFileName, *dbConfigFileName); err != nil {
 		errorToLog = err
 	}
+	fmt.Printf("cfg ---> %v\n", cfg)
 
 	if err := log.InitCfg(cfg); err != nil {
 		fmt.Printf("Error initializing loggers: %v\n", err)
