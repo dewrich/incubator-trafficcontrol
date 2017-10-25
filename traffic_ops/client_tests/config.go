@@ -17,6 +17,7 @@
 package client_tests
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -25,17 +26,17 @@ import (
 	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
 )
 
+var (
+	db *sql.DB
+)
+
 // Config reflects the structure of the cdn.conf file
 type Config struct {
-	URL                *url.URL       `json:"-"`
-	DB                 ConfigDatabase `json:"db"`
-	Port               string         `json:"port"`
-	LogLocationError   string         `json:"log_location_error"`
-	LogLocationWarning string         `json:"log_location_warning"`
-	LogLocationInfo    string         `json:"log_location_info"`
-	LogLocationDebug   string         `json:"log_location_debug"`
-	LogLocationEvent   string         `json:"log_location_event"`
-	Insecure           bool           `json:"insecure"`
+	URL      *url.URL       `json:"-"`
+	DB       ConfigDatabase `json:"database"`
+	Port     string         `json:"port"`
+	Log      Locations      `json:"logLocations"`
+	Insecure bool           `json:"insecure"`
 }
 
 // ConfigDatabase reflects the structure of the database.conf file
@@ -50,55 +51,52 @@ type ConfigDatabase struct {
 	SSL         bool   `json:"ssl"`
 }
 
+// ConfigDatabase reflects the structure of the database.conf file
+type Locations struct {
+	Debug   string `json:"debug"`
+	Event   string `json:"event"`
+	Error   string `json:"error"`
+	Info    string `json:"info"`
+	Warning string `json:"warning"`
+}
+
+// ParseConfig validates required fields, and parses non-JSON types
+func ParseConfig(cfg Config) (Config, error) {
+	if cfg.Log.Error == "" {
+		cfg.Log.Error = log.LogLocationNull
+	}
+	if cfg.Log.Warning == "" {
+		cfg.Log.Warning = log.LogLocationNull
+	}
+	if cfg.Log.Info == "" {
+		cfg.Log.Info = log.LogLocationNull
+	}
+	if cfg.Log.Debug == "" {
+		cfg.Log.Debug = log.LogLocationNull
+	}
+	if cfg.Log.Event == "" {
+		cfg.Log.Event = log.LogLocationNull
+	}
+	return cfg, nil
+}
+
 // LoadConfig - reads the config file into the Config struct
-func LoadConfig(cdnConfPath string, dbConfPath string) (Config, error) {
+func LoadConfig(confPath string) (Config, error) {
+	fmt.Printf("LoadConfig...\n")
 	// load json from cdn.conf
-	confBytes, err := ioutil.ReadFile(cdnConfPath)
+	confBytes, err := ioutil.ReadFile(confPath)
 	if err != nil {
-		return Config{}, fmt.Errorf("reading CDN conf '%s': %v", cdnConfPath, err)
+		return Config{}, fmt.Errorf("Reading CDN conf '%s': %v", confPath, err)
 	}
 
 	var cfg Config
 	err = json.Unmarshal(confBytes, &cfg)
 	if err != nil {
-		return Config{}, fmt.Errorf("unmarshalling '%s': %v", cdnConfPath, err)
+		fmt.Printf("cfg2 ---> %v\n", cfg)
+		return Config{}, fmt.Errorf("unmarshalling '%s': %v", confPath, err)
 	}
 
-	// load json from database.conf
-	dbConfBytes, err := ioutil.ReadFile(dbConfPath)
-	if err != nil {
-		return Config{}, fmt.Errorf("reading db conf '%s': %v", dbConfPath, err)
-	}
-	err = json.Unmarshal(dbConfBytes, &cfg.DB)
-	if err != nil {
-		return Config{}, fmt.Errorf("unmarshalling '%s': %v", dbConfPath, err)
-	}
 	cfg, err = ParseConfig(cfg)
 
 	return cfg, err
-}
-
-// ParseConfig validates required fields, and parses non-JSON types
-func ParseConfig(cfg Config) (Config, error) {
-	missings := ""
-	if cfg.Port == "" {
-		missings += "port, "
-	}
-	if cfg.LogLocationError == "" {
-		cfg.LogLocationError = log.LogLocationNull
-	}
-	if cfg.LogLocationWarning == "" {
-		cfg.LogLocationWarning = log.LogLocationNull
-	}
-	if cfg.LogLocationInfo == "" {
-		cfg.LogLocationInfo = log.LogLocationNull
-	}
-	if cfg.LogLocationDebug == "" {
-		cfg.LogLocationDebug = log.LogLocationNull
-	}
-	if cfg.LogLocationEvent == "" {
-		cfg.LogLocationEvent = log.LogLocationNull
-	}
-
-	return cfg, nil
 }

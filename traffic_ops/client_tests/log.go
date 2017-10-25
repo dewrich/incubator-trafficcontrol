@@ -54,23 +54,25 @@ func Success(t *testing.T, msg string, args ...interface{}) {
 
 // ErrorLog - critical messages
 func (c Config) ErrorLog() log.LogLocation {
-	return log.LogLocation(c.LogLocationError)
+	return log.LogLocation(c.Log.Error)
 }
 
 // WarningLog - warning messages
 func (c Config) WarningLog() log.LogLocation {
-	return log.LogLocation(c.LogLocationWarning)
+	return log.LogLocation(c.Log.Warning)
 }
 
 // InfoLog - information messages
-func (c Config) InfoLog() log.LogLocation { return log.LogLocation(c.LogLocationInfo) }
+func (c Config) InfoLog() log.LogLocation {
+	return log.LogLocation(c.Log.Info)
+}
 
 // DebugLog - troubleshooting messages
 func (c Config) DebugLog() log.LogLocation {
-	return log.LogLocation(c.LogLocationDebug)
+	return log.LogLocation(c.Log.Debug)
 }
 
 // EventLog - access.log high level transactions
 func (c Config) EventLog() log.LogLocation {
-	return log.LogLocation(c.LogLocationEvent)
+	return log.LogLocation(c.Log.Event)
 }

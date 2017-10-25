@@ -17,9 +17,12 @@ package client_tests
 
 import (
 	"bytes"
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -27,6 +30,7 @@ import (
 	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
 	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -39,22 +43,35 @@ func init() {
 	toPass := flag.String("toPass", "password", "Traffic Ops password")
 
 	configFileName := flag.String("cfg", "", "The config file path")
-	dbConfigFileName := flag.String("dbcfg", "", "The db config file path")
 	flag.Parse()
 
 	var cfg Config
 	var err error
 	var errorToLog error
-	if cfg, err = LoadConfig(*configFileName, *dbConfigFileName); err != nil {
+	if cfg, err = LoadConfig(*configFileName); err != nil {
+		fmt.Printf("Error Loading Config %v %v\n", cfg, err)
 		errorToLog = err
 	}
-	fmt.Printf("cfg ---> %v\n", cfg)
+
+	sslStr := "require"
+	if !cfg.DB.SSL {
+		sslStr = "disable"
+	}
 
 	if err := log.InitCfg(cfg); err != nil {
 		fmt.Printf("Error initializing loggers: %v\n", err)
 		return
 	}
+	fmt.Printf("cfg ---> %v\n", cfg)
+
+	fmt.Printf(`Using Config values:
+ Db Server:            %s
+ Db User:              %s
+ Db Name:              %s
+ Db Ssl:               %t`, cfg.DB.Hostname, cfg.DB.User, cfg.DB.DBName, cfg.DB.SSL)
+
 	log.Warnln(errorToLog)
+
 	var loginErr error
 	toReqTimeout := time.Second * time.Duration(30)
 	to, loginErr = client.LoginWithAgent(*toURL, *toUser, *toPass, true, "traffic-ops-client-integration-tests", true, toReqTimeout)
@@ -63,6 +80,40 @@ func init() {
 		os.Exit(1)
 	}
 	log.Debugln("%v-->", toURL)
+
+	db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", cfg.DB.User, cfg.DB.Password, cfg.DB.Hostname, cfg.DB.DBName, sslStr))
+	if err != nil {
+		log.Errorf("opening database: %v\n", err)
+		return
+	}
+	testData, err := ioutil.ReadFile("./sample_cdn.json")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	var tc TrafficControl
+	err = json.Unmarshal(testData, &tc)
+	if err != nil {
+		log.Errorf("Cannot unmarshal the json ", err)
+	}
+	fmt.Printf("cdns ---> %v\n", tc.CDNs)
+
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name FROM cdn")
+	if err != nil {
+		log.Errorf("selecting tables: %v\n", err)
+		return
+	}
+
+	for rows.Next() {
+		var id int
+		var name string
+		err = rows.Scan(&id, &name)
+		fmt.Println("id | name")
+		fmt.Printf("%v %s\n", id, name)
+	}
+
+	setupData(db)
 }
 
 //GetCDN returns a Cdn struct
