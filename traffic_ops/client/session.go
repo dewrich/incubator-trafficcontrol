@@ -159,8 +159,7 @@ func LoginWithAgent(toURL string, toUser string, toPasswd string, insecure bool,
 
 // request performs the actual HTTP request to Traffic Ops
 func (to *Session) request(method, path string, body []byte) (*http.Response, error) {
-	fmt.Printf("method ---> %v\n", method)
-	fmt.Printf("path ---> %v\n", path)
+	fmt.Printf("%s %s\n", method, path)
 	url := fmt.Sprintf("%s%s", to.URL, path)
 	log.Debugln("%v-->", to)
 

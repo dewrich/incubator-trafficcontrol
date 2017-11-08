@@ -17,7 +17,6 @@ package client_tests
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -25,6 +24,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"testing"
 	"time"
 
 	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
@@ -33,59 +33,56 @@ import (
 	_ "github.com/lib/pq"
 )
 
+//TODO: drichardson - put these in the config
 var (
 	to *client.Session
 )
 
-func init() {
-	toURL := flag.String("toURL", "http://localhost:3000", "Traffic Ops URL")
-	toUser := flag.String("toUser", "admin", "Traffic Ops user")
-	toPass := flag.String("toPass", "password", "Traffic Ops password")
+func TestMain(m *testing.M) {
 
 	configFileName := flag.String("cfg", "", "The config file path")
 	flag.Parse()
 
 	var cfg Config
 	var err error
-	var errorToLog error
+	fmt.Printf("configFileName ---> %v\n", configFileName)
 	if cfg, err = LoadConfig(*configFileName); err != nil {
 		fmt.Printf("Error Loading Config %v %v\n", cfg, err)
-		errorToLog = err
 	}
 
-	sslStr := "require"
-	if !cfg.DB.SSL {
-		sslStr = "disable"
-	}
-
-	if err := log.InitCfg(cfg); err != nil {
+	if err = log.InitCfg(cfg); err != nil {
 		fmt.Printf("Error initializing loggers: %v\n", err)
 		return
 	}
-	fmt.Printf("cfg ---> %v\n", cfg)
+	log.Debugln("cfg ---> %v\n", cfg)
 
-	fmt.Printf(`Using Config values:
- Db Server:            %s
- Db User:              %s
- Db Name:              %s
- Db Ssl:               %t`, cfg.DB.Hostname, cfg.DB.User, cfg.DB.DBName, cfg.DB.SSL)
+	log.Infof(`Using Config values:
+			   TO URL:               %s
+			   Db Server:            %s
+			   Db User:              %s
+			   Db Name:              %s
+			   Db Ssl:               %t`, cfg.TOURL, cfg.DB.Hostname, cfg.DB.User, cfg.DB.DBName, cfg.DB.SSL)
 
-	log.Warnln(errorToLog)
+	//log.Debugln("Setting up Data")
+	prepareDatabase(&cfg)
 
+	//setupSession(cfg, *toURL, *toUser, *toPass)
+
+}
+
+func getConfigOptionsFromEnv() {
+}
+
+func setupSession(cfg *Config, toURL string, toUser string, toPass string) {
 	var loginErr error
 	toReqTimeout := time.Second * time.Duration(30)
-	to, loginErr = client.LoginWithAgent(*toURL, *toUser, *toPass, true, "traffic-ops-client-integration-tests", true, toReqTimeout)
+	to, loginErr = client.LoginWithAgent(toURL, toUser, toPass, true, "traffic-ops-client-integration-tests", true, toReqTimeout)
 	if loginErr != nil {
-		fmt.Printf("\nError logging in to %v: %v\nMake sure toURL, toUser, and toPass flags are included and correct.\nExample:  go test -toUser=admin -toPass=pass -toURL=http://localhost:3000\n\n", *toURL, loginErr)
+		fmt.Printf("\nError logging in to %v: %v\nMake sure toURL, toUser, and toPass flags are included and correct.\nExample:  go test -toUser=admin -toPass=pass -toURL=http://localhost:3000\n\n", toURL, loginErr)
 		os.Exit(1)
 	}
 	log.Debugln("%v-->", toURL)
 
-	db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", cfg.DB.User, cfg.DB.Password, cfg.DB.Hostname, cfg.DB.DBName, sslStr))
-	if err != nil {
-		log.Errorf("opening database: %v\n", err)
-		return
-	}
 	testData, err := ioutil.ReadFile("./sample_cdn.json")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -98,22 +95,20 @@ func init() {
 	}
 	fmt.Printf("cdns ---> %v\n", tc.CDNs)
 
-	defer db.Close()
-	rows, err := db.Query("SELECT id, name FROM cdn")
-	if err != nil {
-		log.Errorf("selecting tables: %v\n", err)
-		return
-	}
+	//defer db.Close()
+	//rows, err := db.Query("SELECT id, name FROM cdn")
+	//if err != nil {
+	//log.Errorf("selecting tables: %v\n", err)
+	//return
+	//}
 
-	for rows.Next() {
-		var id int
-		var name string
-		err = rows.Scan(&id, &name)
-		fmt.Println("id | name")
-		fmt.Printf("%v %s\n", id, name)
-	}
-
-	setupData(db)
+	//for rows.Next() {
+	//var id int
+	//var name string
+	//err = rows.Scan(&id, &name)
+	//fmt.Println("id | name")
+	//fmt.Printf("%v %s\n", id, name)
+	//}
 }
 
 //GetCDN returns a Cdn struct

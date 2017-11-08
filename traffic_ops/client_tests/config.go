@@ -21,34 +21,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/url"
+	"os"
 
-	log "github.com/apache/incubator-trafficcontrol/lib/go-log"
+	"github.com/kelseyhightower/envconfig"
 )
 
 var (
 	db *sql.DB
 )
 
-// Config reflects the structure of the cdn.conf file
+// Config reflects the structure of the test-to-api.conf file
 type Config struct {
-	URL      *url.URL       `json:"-"`
-	DB       ConfigDatabase `json:"database"`
-	Port     string         `json:"port"`
-	Log      Locations      `json:"logLocations"`
-	Insecure bool           `json:"insecure"`
+	TOURL    string             `json:"toURL" envconfig:"TO_URL" default:"https://localhost:443"`
+	TOUser   string             `json:"toUser" envconfig:"TO_USER"`
+	Insecure bool               `json:"sslInsecure" envconfig:"SSL_INSECURE"`
+	DB       TrafficOpsDatabase `json:"db"`
+	Log      Locations          `json:"logLocations"`
 }
 
-// ConfigDatabase reflects the structure of the database.conf file
-type ConfigDatabase struct {
-	Description string `json:"description"`
-	DBName      string `json:"dbname"`
-	Hostname    string `json:"hostname"`
-	User        string `json:"user"`
-	Password    string `json:"password"`
-	Port        string `json:"port"`
-	Type        string `json:"type"`
-	SSL         bool   `json:"ssl"`
+type TrafficOpsDatabase struct {
+	DBName      string `json:"dbname" envconfig:"TODB_NAME"`
+	Hostname    string `json:"hostname" envconfig:"TODB_HOSTNAME"`
+	User        string `json:"user" envconfig:"TODB_USER"`
+	Password    string `json:"password" envconfig:"TODB_PASSWORD"`
+	Port        string `json:"port" envconfig:"TODB_PORT"`
+	DBType      string `json:"type" envconfig:"TODB_TYPE"`
+	SSL         bool   `json:"ssl" envconfig:"TODB_SSL"`
+	Description string `json:"description" envconfig:"TODB_DESCRIPTION"`
 }
 
 // ConfigDatabase reflects the structure of the database.conf file
@@ -60,43 +59,33 @@ type Locations struct {
 	Warning string `json:"warning"`
 }
 
-// ParseConfig validates required fields, and parses non-JSON types
-func ParseConfig(cfg Config) (Config, error) {
-	if cfg.Log.Error == "" {
-		cfg.Log.Error = log.LogLocationNull
-	}
-	if cfg.Log.Warning == "" {
-		cfg.Log.Warning = log.LogLocationNull
-	}
-	if cfg.Log.Info == "" {
-		cfg.Log.Info = log.LogLocationNull
-	}
-	if cfg.Log.Debug == "" {
-		cfg.Log.Debug = log.LogLocationNull
-	}
-	if cfg.Log.Event == "" {
-		cfg.Log.Event = log.LogLocationNull
-	}
-	return cfg, nil
-}
-
 // LoadConfig - reads the config file into the Config struct
 func LoadConfig(confPath string) (Config, error) {
-	fmt.Printf("LoadConfig...\n")
-	// load json from cdn.conf
-	confBytes, err := ioutil.ReadFile(confPath)
-	if err != nil {
-		return Config{}, fmt.Errorf("Reading CDN conf '%s': %v", confPath, err)
-	}
-
+	var err error
 	var cfg Config
-	err = json.Unmarshal(confBytes, &cfg)
+	fmt.Printf("LoadConfig...\n")
+	fmt.Printf("confPath ---> %v\n", confPath)
+
+	// load json from cdn.conf
+	if _, err := os.Stat(confPath); !os.IsNotExist(err) {
+		confBytes, err := ioutil.ReadFile(confPath)
+		if err != nil {
+			return Config{}, fmt.Errorf("Reading CDN conf '%s': %v", confPath, err)
+		}
+
+		err = json.Unmarshal(confBytes, &cfg)
+		if err != nil {
+			return Config{}, fmt.Errorf("unmarshalling '%s': %v", confPath, err)
+		}
+	}
+	//cfg = Config{}
+	err = envconfig.Process("traffic-ops-client-tests", &cfg)
 	if err != nil {
-		fmt.Printf("cfg2 ---> %v\n", cfg)
-		return Config{}, fmt.Errorf("unmarshalling '%s': %v", confPath, err)
+		fmt.Printf("Cannot parse config: %v\n", err)
+		os.Exit(0)
 	}
 
-	cfg, err = ParseConfig(cfg)
+	//cfg, err = ParseConfig(cfg)
 
 	return cfg, err
 }
