@@ -18,9 +18,20 @@
 CREATE TYPE workflow_states AS ENUM ('new', 'submitted', 'complete');
 
 CREATE TABLE deliveryservice_request (
-    id bigserial,
+    assignee_id bigint,
+    author_id bigint NOT NULL,
+    change_type change_types,
+    id bigserial primary key NOT NULL,
+    last_updated timestamp with time zone DEFAULT now(),
+    request json NOT NULL,
     status workflow_states
-) inherits (deliveryservice);
+);
+
+ALTER TABLE deliveryservice_request
+    ADD CONSTRAINT fk_author FOREIGN KEY (author_id) REFERENCES tm_user(id) ON DELETE CASCADE;
+
+ALTER TABLE deliveryservice_request
+    ADD CONSTRAINT fk_assignee FOREIGN KEY (assignee_id) REFERENCES tm_user(id) ON DELETE SET NULL;
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
