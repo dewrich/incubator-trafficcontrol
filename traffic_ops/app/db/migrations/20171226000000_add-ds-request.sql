@@ -15,7 +15,8 @@
 
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
-CREATE TYPE workflow_states AS ENUM ('new', 'submitted', 'complete');
+CREATE TYPE workflow_states AS ENUM ('new', 'submitted', 'rejected', 'complete');
+CREATE TYPE change_types AS ENUM ('create', 'update', 'delete');
 
 CREATE TABLE deliveryservice_request (
     assignee_id bigint,
@@ -36,3 +37,7 @@ ALTER TABLE deliveryservice_request
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
 DROP TABLE deliveryservice_request;
+
+DROP TYPE change_types;
+
+DROP TYPE workflow_states;

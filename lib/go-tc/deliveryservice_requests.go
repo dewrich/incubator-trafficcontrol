@@ -15,6 +15,10 @@ package tc
    limitations under the License.
 */
 
+import (
+	"encoding/json"
+)
+
 // GetDeliveryServiceRequestResponse ...
 type GetDeliveryServiceRequestResponse struct {
 	Response []DeliveryServiceRequest `json:"response"`
@@ -43,14 +47,19 @@ type DeleteDeliveryServiceRequestResponse struct {
 	Alerts []DeliveryServiceRequestAlert `json:"alerts"`
 }
 
-// DeliveryServiceRequest ...
-type DeliveryServiceRequest struct {
-	DeliveryService
-	Status string `json:"status"`
-}
-
 // DeliveryServiceRequestAlert ...
 type DeliveryServiceRequestAlert struct {
 	Level string `json:"level"`
 	Text  string `json:"text"`
+}
+
+// DeliveryServiceRequest is used as part of the workflow to create, modify, or
+// delete a delivery service.
+type DeliveryServiceRequest struct {
+	AssigneeID  int             `json:"assigneeId" db:"assignee_id"`
+	AuthorID    int             `json:"authorId" db:"author_id"`
+	ID          int             `json:"id" db:"id"`
+	LastUpdated Time            `json:"lastUpdated" db:"last_updated"`
+	Request     json.RawMessage `json:"request" db:"request"`
+	Status      string          `json:"status" db:"status"`
 }
