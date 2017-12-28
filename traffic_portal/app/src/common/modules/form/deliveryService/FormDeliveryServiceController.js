@@ -163,6 +163,10 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
         return '-'.repeat(tenant.level) + ' ' + tenant.name;
     };
 
+    $scope.showDiff = function() {
+        alert('todo: show diff');
+    };
+
     $scope.viewTargets = function() {
         $location.path($location.path() + '/targets');
     };
