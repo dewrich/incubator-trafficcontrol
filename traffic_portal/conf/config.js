@@ -25,13 +25,13 @@ module.exports = {
     sslPort: 8443, // set to https port. i.e. 443
     // if useSSL is true, generate ssl certs and provide the proper locations.
     ssl: {
-        key:    '/etc/pki/tls/private/localhost.key',
-        cert:   '/etc/pki/tls/certs/localhost.crt',
-        ca:     [ '/etc/pki/tls/certs/ca-bundle.crt' ]
+        key:    '/Users/dkirkw001c/tmp/localhost.key',
+        cert:   '/Users/dkirkw001c/tmp/localhost.crt',
+        ca:     [ '/Users/dkirkw001c/tmp/ca-bundle.crt' ]
     },
     // set api 'base_url' to the traffic ops api (all api calls made from the traffic portal will be proxied to the api base_url)
     api: {
-        base_url: 'https://localhost:8444/api/'
+        base_url: 'https://cdn-to-oshoc-dank.dev.cdnlab.comcast.net/api/'
     },
     // default static files location (this is where the traffic portal html, css and javascript was installed. rpm installs these files at /opt/traffic_portal/public
     files: {
