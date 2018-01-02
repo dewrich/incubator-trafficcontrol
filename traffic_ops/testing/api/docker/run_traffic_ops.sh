@@ -36,7 +36,6 @@ finish() {
         [[ -n $msg ]] && echo $msg
 }
 
-trap finish EXIT
 
 dbconf=/opt/traffic_ops/app/conf/$TESTENV/database.conf
 if [[ ! -f $dbconf ]]; then
@@ -83,3 +82,4 @@ export USER=root
 
 cd /opt/traffic_ops/app
 ./db/admin.pl --env=$TESTENV reset
+trap finish EXIT
