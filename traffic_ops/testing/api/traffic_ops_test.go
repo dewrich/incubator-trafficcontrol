@@ -63,7 +63,7 @@ func TestMain(m *testing.M) {
 			   DB Ssl:               %t`, *configFileName, *tcFixturesFileName, cfg.TrafficOps.URL, cfg.Default.Session.TimeoutInSecs, cfg.TrafficOpsDB.Hostname, cfg.TrafficOpsDB.User, cfg.TrafficOpsDB.Name, cfg.TrafficOpsDB.SSL)
 
 	//Load the test data
-	loadTestCDN(*tcFixturesFileName)
+	loadFixtures(*tcFixturesFileName)
 
 	var db *sql.DB
 	db, err = openConnection(&cfg)
@@ -110,7 +110,7 @@ func setupSession(cfg Config, toURL string, toUser string, toPass string) (*clie
 	return session, netAddr, err
 }
 
-func loadTestCDN(fixturesPath string) {
+func loadFixtures(fixturesPath string) {
 
 	f, err := ioutil.ReadFile(fixturesPath)
 	if err != nil {
