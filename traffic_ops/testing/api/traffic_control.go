@@ -22,7 +22,7 @@ type TrafficControl struct {
 	ASNs             []tc.ASN             `json:"asns"`
 	CDNs             []tc.CDN             `json:"cdns"`
 	Cachegroups      []tc.CacheGroup      `json:"cachegroups"`
-	DeliveryServices []tc.DeliveryService `json:"deliveryservices"`
+	DeliveryServices []tc.DeliveryService `json:"deliveryServices"`
 	Divisions        []tc.Division        `json:"divisions"`
 	Regions          []tc.Region          `json:"regions"`
 	Tenants          []tc.Tenant          `json:"tenants"`
