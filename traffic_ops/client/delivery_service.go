@@ -17,9 +17,15 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"strconv"
 
-	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
+)
+
+const (
+	API_v12_DELIVERYSERVICES = "/api/1.2/deliveryservices"
 )
 
 // DeliveryServices gets an array of DeliveryServices
@@ -33,6 +39,24 @@ func (to *Session) GetDeliveryServices() ([]tc.DeliveryService, ReqInf, error) {
 	var data tc.GetDeliveryServiceResponse
 	reqInf, err := get(to, deliveryServicesEp(), &data)
 	if err != nil {
+		return nil, reqInf, err
+	}
+
+	return data.Response, reqInf, nil
+}
+
+// GET a CDN by the CDN XMLID
+func (to *Session) GetDeliveryServiceByXMLID(XMLID string) ([]tc.DeliveryService, ReqInf, error) {
+	url := fmt.Sprintf("%s/xmlid/%s", API_v12_DELIVERYSERVICES, XMLID)
+	resp, remoteAddr, err := to.request(http.MethodGet, url, nil)
+	reqInf := ReqInf{CacheHitStatus: CacheHitStatusMiss, RemoteAddr: remoteAddr}
+	if err != nil {
+		return nil, reqInf, err
+	}
+	defer resp.Body.Close()
+
+	var data tc.DeliveryServicesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, reqInf, err
 	}
 
