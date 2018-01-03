@@ -15,7 +15,13 @@ package tc
    limitations under the License.
 */
 
+// DeliveryServicesResponse ...
+type DeliveryServicesResponse struct {
+	Response []DeliveryService `json:"response"`
+}
+
 // GetDeliveryServiceResponse ...
+// Deprecated
 type GetDeliveryServiceResponse struct {
 	Response []DeliveryService `json:"response"`
 }
