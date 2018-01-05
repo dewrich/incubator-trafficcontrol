@@ -174,7 +174,7 @@ func TestGetDeliveryServices(t *testing.T) {
 		t.Errorf("getDeliveryServices expected: nil error, actual: %v", err)
 	}
 
-	if len(servers) != 2 {
+	if len(servers) != 1 {
 		t.Errorf("getDeliveryServices expected: len(servers) == 1, actual: %v", len(servers))
 	}
 
