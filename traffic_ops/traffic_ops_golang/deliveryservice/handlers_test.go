@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 	"testing"
 
 	tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
@@ -34,68 +35,66 @@ import (
 
 func getTestDeliveryServices() []tcapi.DeliveryService {
 	//Initial test fixture
-	const testCase = `
-[
-{
-   "active": true,
-   "ccrDnsTtl": 1,
-   "cdnId": 1,
-   "checkPath": "disp1",
-   "displayName": "/crossdomain.xml",
-   "dnsBypassCname": "cname",
-   "dnsBypassIp": "127.0.0.1",
-   "dnsBypassIp6": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
-   "dnsBypassTTL": 10,
-   "dscp": 0,
-   "edgeHeaderRewrite": "cond %{REMAP_PSEUDO_HOOK} __RETURN__ set-config proxy.config.http.transaction_active_timeout_in 10800 [L]",
-   "geoLimit": 0,
-   "geoLimitCountries": "Can,Mex",
-   "geoRedirectURL": "http://localhost/redirect",
-   "geoProvider": 0,
-   "globalMaxMBPS": 0,
-   "globalMaxTPS": 0,
-   "httpBypassFqdn": "http://bypass",
-   "id": 1,
-   "infoUrl": "http://info.url",
-   "initialDispersion": 0,
-   "ipv6RoutingEnabled": false,
-   "lastUpdated": "2017-01-05 15:04:05+00",
-   "logsEnabled": true,
-   "longDesc": "longdesc",
-   "longDesc1": "longdesc1",
-   "longDesc2": "longdesc2",
-   "maxDnsAnswers": 5,
-   "midHeaderRewrite": "cond %{REMAP_PSEUDO_HOOK} __RETURN__ set-config proxy.config.http.cache.ignore_authentication 1 __RETURN__ set-config proxy.config.http.auth_server_session_private 0 __RETURN__ set-config proxy.config.http.transaction_no_activity_timeout_out 10 __RETURN__ set-config proxy.config.http.transaction_active_timeout_out 10  [L] __RETURN__",
-   "missLat": -2.0,
-   "missLong": -1.0,
-   "multiSiteOrigin": false,
-   "multiSiteOriginAlgorithm": 1,
-   "orgServerFqdn": "http://localhost",
-   "profile": 1,
-   "protocol": 2,
-   "qstringIgnore": 1,
-   "rangeRequestHandling": 1,
-   "regexRemap": "^/([^\/]+)/(.*) http://$1.foo.com/$2",
-   "regionalGeoBlocking": false,
-   "remapText": "@action=allow @src_ip=127.0.0.1-127.0.0.1",
-   "routineName": "ccr",
-   "signingAlgorithm": "url_sig",
-   "sslKeyVersion": 1,
-   "tenantId": 1,
-   "trRequestHeaders": "xyz",
-   "trResponseHeaders": "Access-Control-Allow-Origin: *",
-   "typeId": 1,
-   "xmlId": "ds1"
-}
-]
-`
 	var dses []tcapi.DeliveryService
-	if err := json.Unmarshal([]byte(testCase), &dses); err != nil {
+	if err := json.Unmarshal([]byte(testCaseArr), &dses); err != nil {
 		fmt.Printf("err ---> %v\n", err)
 		return nil
 	}
 
 	return dses
+}
+
+// TestValidate1 ...
+func TestValidate1(t *testing.T) {
+
+	ds := GetRefType()
+	if err := json.Unmarshal([]byte(testCase), &ds); err != nil {
+		fmt.Printf("err ---> %v\n", err)
+		return
+	}
+
+	errors := ds.Sanitize()
+	fmt.Printf("errors ---> %v\n", errors)
+
+	//if len(expected) != len(errors) {
+	//t.Errorf("Expected %d errors, got %d", len(expected), len(errors))
+	//}
+	//displayName := "this is gonna be a name that's a little longer than the limit of 48 chars.."
+	//expected := []string{
+	//`display name '` + displayName + `' can be no longer than 48 characters`,
+	//`missLat value -91 must not exceed +/- 90.0`,
+	//`missLong value 102 must not exceed +/- 90.0`,
+	//`cdnId is required`,
+	//`xmlId is required`,
+	//}
+
+	//if len(expected) != len(errors) {
+	//t.Errorf("Expected %d errors, got %d", len(expected), len(errors))
+	//}
+}
+
+// TestValidate2 ...
+func TestValidate2(t *testing.T) {
+
+	var ds tcapi.DeliveryService
+	if err := json.Unmarshal([]byte(testCase), &ds); err != nil {
+		fmt.Printf("err ---> %v\n", err)
+		return
+	}
+	var refType = TODeliveryService(ds)
+	errors := refType.Sanitize()
+	// Test the routingName length
+	routingName := strings.Repeat("#", 48)
+	ds.RoutingName = routingName
+
+	// Test the xmlId length
+	xmlId := strings.Repeat("#", 48)
+	ds.XMLID = &xmlId
+
+	for _, e := range errors {
+		fmt.Printf("%s\n", e)
+	}
+
 }
 
 func TestGetDeliveryServices(t *testing.T) {
@@ -193,3 +192,59 @@ func (s SortableDeliveryServices) Less(i, j int) bool {
 	b := *s[j].XMLID
 	return a < b
 }
+
+const testCaseArr = "[" + testCase + "]"
+
+const testCase = `
+{
+   "active": true,
+   "ccrDnsTtl": 1,
+   "cdnId": 1,
+   "checkPath": "disp1",
+   "displayName": "/crossdomain.xml",
+   "dnsBypassCname": "cname",
+   "dnsBypassIp": "127.0.0.1",
+   "dnsBypassIp6": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+   "dnsBypassTTL": 10,
+   "dscp": 0,
+   "edgeHeaderRewrite": "cond %{REMAP_PSEUDO_HOOK} __RETURN__ set-config proxy.config.http.transaction_active_timeout_in 10800 [L]",
+   "geoLimit": 0,
+   "geoLimitCountries": "Can,Mex",
+   "geoRedirectURL": "http://localhost/redirect",
+   "geoProvider": 0,
+   "globalMaxMBPS": 0,
+   "globalMaxTPS": 0,
+   "httpBypassFqdn": "http://bypass",
+   "id": 1,
+   "infoUrl": "http://info.url",
+   "initialDispersion": 0,
+   "ipv6RoutingEnabled": false,
+   "lastUpdated": "2017-01-05 15:04:05+00",
+   "logsEnabled": true,
+   "longDesc": "longdesc",
+   "longDesc1": "longdesc1",
+   "longDesc2": "longdesc2",
+   "maxDnsAnswers": 5,
+   "midHeaderRewrite": "cond %{REMAP_PSEUDO_HOOK} __RETURN__ set-config proxy.config.http.cache.ignore_authentication 1 __RETURN__ set-config proxy.config.http.auth_server_session_private 0 __RETURN__ set-config proxy.config.http.transaction_no_activity_timeout_out 10 __RETURN__ set-config proxy.config.http.transaction_active_timeout_out 10  [L] __RETURN__",
+   "missLat": -2.0,
+   "missLong": -1.0,
+   "multiSiteOrigin": false,
+   "multiSiteOriginAlgorithm": 1,
+   "orgServerFqdn": "http://localhost",
+   "profile": 1,
+   "protocol": 2,
+   "qstringIgnore": 1,
+   "rangeRequestHandling": 1,
+   "regexRemap": "^/([^\/]+)/(.*) http://$1.foo.com/$2",
+   "regionalGeoBlocking": false,
+   "remapText": "@action=allow @src_ip=127.0.0.1-127.0.0.1",
+   "routineName": "ccr",
+   "signingAlgorithm": "url_sig",
+   "sslKeyVersion": 1,
+   "tenantId": 1,
+   "trRequestHeaders": "xyz",
+   "trResponseHeaders": "Access-Control-Allow-Origin: *",
+   "typeId": 1,
+   "xmlId": "ds1"
+}
+`
