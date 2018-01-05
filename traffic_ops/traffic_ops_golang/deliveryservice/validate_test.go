@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
+	tc "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
 )
 
 //Initial test fixture
@@ -50,7 +50,7 @@ const testCase = `
 // TestValidate1 ...
 func TestValidate1(t *testing.T) {
 
-	var ds v13.DeliveryService
+	var ds tc.DeliveryService
 	if err := json.Unmarshal([]byte(testCase), &ds); err != nil {
 		fmt.Printf("err ---> %v\n", err)
 		return
@@ -78,7 +78,7 @@ func TestValidate1(t *testing.T) {
 // TestValidate2 ...
 func TestValidate2(t *testing.T) {
 
-	var ds v13.DeliveryService
+	var ds tc.DeliveryService
 	if err := json.Unmarshal([]byte(testCase), &ds); err != nil {
 		fmt.Printf("err ---> %v\n", err)
 		return

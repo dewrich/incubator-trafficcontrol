@@ -24,13 +24,13 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
+	tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 )
 
 // Validate - validates a delivery service request
-func Validate(ds v13.DeliveryService) []error {
+func Validate(ds tcapi.DeliveryService) []error {
 	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
 	noSpaces.Error("cannot contain spaces")
 
