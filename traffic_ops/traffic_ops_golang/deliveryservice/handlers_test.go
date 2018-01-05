@@ -53,7 +53,7 @@ func TestValidate1(t *testing.T) {
 		return
 	}
 
-	errors := ds.Sanitize()
+	errors := ds.CheckFields()
 	fmt.Printf("errors ---> %v\n", errors)
 
 	//if len(expected) != len(errors) {
@@ -82,7 +82,7 @@ func TestValidate2(t *testing.T) {
 		return
 	}
 	var refType = TODeliveryService(ds)
-	errors := refType.Sanitize()
+	errors := refType.CheckFields()
 	// Test the routingName length
 	routingName := strings.Repeat("#", 48)
 	ds.RoutingName = routingName
