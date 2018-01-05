@@ -20,346 +20,52 @@ package deliveryservice
  */
 
 import (
+	"errors"
 	"fmt"
-	"math"
-	"strings"
-	"unicode"
+	"regexp"
 
-	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
+	tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 )
 
-// Validate all fields for a delivery service
-func Validate(ds tc.DeliveryService) []error {
-	var errors []error
-	validations := []func(tc.DeliveryService) error{
-		ValidActive,
-		ValidCacheURL,
-		ValidCCRDNSTTL,
-		ValidCDNID,
-		ValidCheckPath,
-		ValidDisplayName,
-		ValidDNSBypassCname,
-		ValidDNSBypassIP,
-		ValidDNSBypassIP6,
-		ValidDNSBypassTTL,
-		ValidDSCP,
-		ValidEdgeHeaderRewrite,
-		ValidGeoLimit,
-		ValidGeoLimitCountries,
-		ValidGeoLimitRedirectURL,
-		ValidGeoProvider,
-		ValidGlobalMaxMbps,
-		ValidGlobalMaxTps,
-		ValidHTTPBypassFQDN,
-		ValidInfoURL,
-		ValidInitialDispersion,
-		ValidIPv6RoutingEnabled,
-		ValidLogsEnabled,
-		ValidLongDesc,
-		ValidLongDesc1,
-		ValidLongDesc2,
-		ValidMaxDNSAnswers,
-		ValidMidHeaderRewrite,
-		ValidMissLat,
-		ValidMissLong,
-		ValidMultiSiteOrigin,
-		ValidMultiSiteOriginAlgorithm,
-		ValidOrgServerFqdn,
-		ValidOriginShield,
-		ValidProfileID,
-		ValidProtocol,
-		ValidQstringIgnore,
-		ValidRangeRequestHandling,
-		ValidRegexRemap,
-		ValidRegionalGeoBlocking,
-		ValidRemapText,
-		ValidRoutingName,
-		ValidSigningAlgorithm,
-		ValidSslKeyVersion,
-		ValidTenantID,
-		ValidTrRequestHeaders,
-		ValidTrResponseHeaders,
-		ValidTypeID,
-		ValidXMLID,
+// Validate - validates a delivery service request
+func Validate(ds tcapi.DeliveryService) []error {
+	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
+	noSpaces.Error("cannot contain spaces")
+
+	// Custom Examples:
+	// Just add isCIDR as a parameter to Validate()
+	// isCIDR := validation.NewStringRule(govalidator.IsCIDR, "must be a valid CIDR address")
+	err := validation.Errors{
+		"active":              validation.Validate(ds.Active, validation.NotNil),
+		"cdnId":               validation.Validate(ds.CDNID, validation.NotNil),
+		"displayName":         validation.Validate(ds.DisplayName, validation.Required),
+		"dnsBypassIp":         validation.Validate(ds.DNSBypassIP, is.IP),
+		"dnsBypassIp6":        validation.Validate(ds.DNSBypassIP6, is.IPv6),
+		"dscp":                validation.Validate(ds.DSCP, validation.NotNil),
+		"geoLimit":            validation.Validate(ds.GeoLimit, validation.NotNil),
+		"geoProvider":         validation.Validate(ds.GeoProvider, validation.NotNil),
+		"infoUrl":             validation.Validate(ds.InfoURL, is.URL),
+		"logsEnabled":         validation.Validate(ds.LogsEnabled, validation.NotNil),
+		"orgServerFqdn":       validation.Validate(ds.OrgServerFQDN, is.URL),
+		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking, validation.NotNil),
+		"routingName":         validation.Validate(ds.RoutingName, validation.Length(1, 48)),
+		"typeId":              validation.Validate(ds.TypeID, validation.NotNil),
+		"xmlId":               validation.Validate(ds.XMLID, validation.Required, noSpaces, validation.Length(1, 48)),
 	}
 
-	for _, v := range validations {
-		if err := v(ds); err != nil {
-			errors = append(errors, err)
+	return ToErrors(err)
+}
+
+// ToErrors - Flip to an array of errors
+func ToErrors(err map[string]error) []error {
+	vErrors := []error{}
+	for key, value := range err {
+		if value != nil {
+			errMsg := fmt.Sprintf("'%v' %v", key, value)
+			vErrors = append(vErrors, errors.New(errMsg))
 		}
 	}
-	return errors
-}
-
-// ValidActive ...
-func ValidActive(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidCacheURL ,,,
-func ValidCacheURL(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidCCRDNSTTL ...
-func ValidCCRDNSTTL(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidCDNID ...
-func ValidCDNID(ds tc.DeliveryService) error {
-	// TODO: validate exists in cdn table
-	return nil
-}
-
-// ValidCheckPath ...
-func ValidCheckPath(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidDNSBypassCname ...
-func ValidDNSBypassCname(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidDNSBypassIP ...
-func ValidDNSBypassIP(ds tc.DeliveryService) error {
-	// TODO: valid IP address
-	return nil
-}
-
-// ValidDNSBypassIP6 ...
-func ValidDNSBypassIP6(ds tc.DeliveryService) error {
-	// TODO: valid IP address
-	return nil
-}
-
-// ValidDNSBypassTTL ...
-func ValidDNSBypassTTL(ds tc.DeliveryService) error {
-	// TODO: valid TTL range
-	return nil
-}
-
-// ValidDSCP ...
-func ValidDSCP(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidEdgeHeaderRewrite ...
-func ValidEdgeHeaderRewrite(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidDisplayName ...
-func ValidDisplayName(ds tc.DeliveryService) error {
-	if len(ds.DisplayName) > 48 {
-		return fmt.Errorf("display name '%s' can be no longer than 48 characters", ds.DisplayName)
-	}
-	return nil
-}
-
-// ValidGeoLimit ...
-func ValidGeoLimit(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidGeoLimitCountries ...
-func ValidGeoLimitCountries(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidGeoLimitRedirectURL ...
-func ValidGeoLimitRedirectURL(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidGeoProvider ...
-func ValidGeoProvider(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidGlobalMaxMbps ...
-func ValidGlobalMaxMbps(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidGlobalMaxTps ...
-func ValidGlobalMaxTps(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidHTTPBypassFQDN ...
-func ValidHTTPBypassFQDN(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidInfoURL ...
-func ValidInfoURL(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidInitialDispersion ...
-func ValidInitialDispersion(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidIPv6RoutingEnabled ...
-func ValidIPv6RoutingEnabled(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidLogsEnabled ...
-func ValidLogsEnabled(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidLongDesc ...
-func ValidLongDesc(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidLongDesc1 ...
-func ValidLongDesc1(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidLongDesc2 ...,
-func ValidLongDesc2(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidMaxDNSAnswers ...
-func ValidMaxDNSAnswers(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidMidHeaderRewrite ...
-func ValidMidHeaderRewrite(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidMissLat ...
-func ValidMissLat(ds tc.DeliveryService) error {
-	if math.Abs(ds.MissLat) > 90 {
-		return fmt.Errorf("missLat value %2.0f must not exceed +/- 90.0", ds.MissLat)
-	}
-	return nil
-}
-
-// ValidMissLong ...
-func ValidMissLong(ds tc.DeliveryService) error {
-	if math.Abs(ds.MissLong) > 90 {
-		return fmt.Errorf("missLong value %2.0f must not exceed +/- 90.0", ds.MissLong)
-	}
-	return nil
-}
-
-// ValidMultiSiteOrigin ...
-func ValidMultiSiteOrigin(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidMultiSiteOriginAlgorithm ...
-func ValidMultiSiteOriginAlgorithm(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidOrgServerFqdn ...
-func ValidOrgServerFqdn(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidOriginShield ...
-func ValidOriginShield(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidProfileID ...
-func ValidProfileID(ds tc.DeliveryService) error {
-	// TODO: validate exists in profile table
-	return nil
-}
-
-// ValidProtocol ...
-func ValidProtocol(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidQstringIgnore ...
-func ValidQstringIgnore(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidRangeRequestHandling ...
-func ValidRangeRequestHandling(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidRegexRemap ...
-func ValidRegexRemap(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidRegionalGeoBlocking ...
-func ValidRegionalGeoBlocking(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidRemapText ...
-func ValidRemapText(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidRoutingName ...
-func ValidRoutingName(ds tc.DeliveryService) error {
-	if len(ds.RoutingName) > 48 {
-		return fmt.Errorf("routing name '%s' can be no longer than 48 characters", ds.RoutingName)
-	}
-	return nil
-}
-
-// ValidSigningAlgorithm ...
-func ValidSigningAlgorithm(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidSslKeyVersion ...
-func ValidSslKeyVersion(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidTenantID ...
-func ValidTenantID(ds tc.DeliveryService) error {
-	// TODO: validate exists in tenant table
-	return nil
-}
-
-// ValidTrRequestHeaders ...
-func ValidTrRequestHeaders(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidTrResponseHeaders ...
-func ValidTrResponseHeaders(ds tc.DeliveryService) error {
-	return nil
-}
-
-// ValidTypeID ...
-func ValidTypeID(ds tc.DeliveryService) error {
-	// TODO: validate exists in type table
-	return nil
-}
-
-// ValidXMLID ...
-func ValidXMLID(ds tc.DeliveryService) error {
-	if len(ds.XMLID) == 0 {
-		return fmt.Errorf("xmlId is required")
-	}
-	if strings.IndexFunc(ds.XMLID, unicode.IsSpace) != -1 {
-		return fmt.Errorf("xmlId '%s' must not contain spaces", ds.XMLID)
-	}
-	if len(ds.XMLID) > 48 {
-		return fmt.Errorf("xmlId '%s' must be no longer than 48 characters", ds.XMLID)
-	}
-	return nil
+	return vErrors
 }

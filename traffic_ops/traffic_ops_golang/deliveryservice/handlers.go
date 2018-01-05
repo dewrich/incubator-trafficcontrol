@@ -34,7 +34,7 @@ import (
 
 const DeliveryServicsPrivLevel = 10
 
-func Handler(db *sqlx.DB) http.HandlerFunc {
+func GetHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		handleErrs := tc.GetHandleErrorsFunc(w, r)
 
@@ -71,7 +71,7 @@ func Handler(db *sqlx.DB) http.HandlerFunc {
 func getDeliveryServicesResponse(q url.Values, db *sqlx.DB) (*tcapi.DeliveryServicesResponse, error) {
 	dses, err := getDeliveryServices(q, db)
 	if err != nil {
-		return nil, fmt.Errorf("getting DeliveryServices response: %v", err)
+		return nil, fmt.Errorf("getting CDNs response: %v", err)
 	}
 
 	resp := tcapi.DeliveryServicesResponse{
@@ -87,14 +87,15 @@ func getDeliveryServices(v url.Values, db *sqlx.DB) ([]tcapi.DeliveryService, er
 	// Query Parameters to Database Query column mappings
 	// see the fields mapped in the SQL query
 	queryParamsToQueryCols := map[string]string{
-		"xmlId": "xml_id",
+		"domainName":    "domain_name",
+		"dnssecEnabled": "dnssec_enabled",
+		"id":            "id",
+		"name":          "name",
 	}
 
 	query, queryValues := dbhelpers.BuildQuery(v, selectDSesQuery(), queryParamsToQueryCols)
 
 	rows, err = db.NamedQuery(query, queryValues)
-	fmt.Printf("rows ---> %v\n", rows)
-	fmt.Printf("err ---> %v\n", err)
 	if err != nil {
 		return nil, err
 	}
@@ -114,16 +115,16 @@ func getDeliveryServices(v url.Values, db *sqlx.DB) ([]tcapi.DeliveryService, er
 func selectDSesQuery() string {
 	query := `SELECT
  active,
+ cacheurl,
  ccr_dns_ttl,
  cdn_id,
- cacheurl,
  check_path,
+ display_name,
  dns_bypass_cname,
  dns_bypass_ip,
  dns_bypass_ip6,
  dns_bypass_ttl,
  dscp,
- display_name,
  edge_header_rewrite,
  geo_limit,
  geo_limit_countries,
@@ -133,9 +134,9 @@ func selectDSesQuery() string {
  global_max_tps,
  http_bypass_fqdn,
  id,
- ipv6_routing_enabled,
  info_url,
  initial_dispersion,
+ ipv6_routing_enabled,
  last_updated,
  logs_enabled,
  long_desc,
@@ -157,11 +158,11 @@ func selectDSesQuery() string {
  regional_geo_blocking,
  remap_text,
  routing_name,
- ssl_key_version,
  signing_algorithm,
+ ssl_key_version,
+ tenant_id,
  tr_request_headers,
  tr_response_headers,
- tenant_id,
  type,
  xml_id
 

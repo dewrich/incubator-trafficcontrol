@@ -22,19 +22,13 @@ package deliveryservice
 import (
 	"errors"
 	"fmt"
-	"regexp"
-	"strings"
 
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
-	"github.com/asaskevich/govalidator"
-	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/is"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/dbhelpers"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/tovalidate"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
@@ -68,120 +62,11 @@ func (ds *TODeliveryService) SetID(i int) {
 }
 
 func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
-
-	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
-	noSpaces.Error("cannot contain spaces")
-
-	noPeriods := validation.Match(regexp.MustCompile("^[^\\.]*$"))
-	noPeriods.Error("cannot contain periods")
-
-	var typeName string
-	var err error
-	if db != nil && ds.TypeID != nil {
-		typeID := *ds.TypeID
-		typeName, err = getTypeName(db, typeID)
-		if err != nil {
-			return []error{err}
-		}
+	errs := []error{}
+	if ds.XMLID == nil {
+		errs = append(errs, errors.New(`ds 'xmlId' is required.`))
 	}
-
-	DNSRegexType := "^DNS.*$"
-	HTTPRegexType := "^HTTP.*$"
-	SteeringRegexType := "^STEERING.*$"
-	// Custom Examples:
-	// Just add isCIDR as a parameter to Validate()
-	// isCIDR := validation.NewStringRule(govalidator.IsCIDR, "must be a valid CIDR address")
-	isHost := validation.NewStringRule(govalidator.IsHost, "must be a valid hostname")
-	errs := validation.Errors{
-		"active": validation.Validate(ds.Active, validation.NotNil),
-		"cdnId":  validation.Validate(ds.CDNID, validation.NotNil),
-		"displayName": validation.Validate(ds.DisplayName,
-			validation.Required),
-		"dnsBypassIp":  validation.Validate(ds.DNSBypassIP, is.IP),
-		"dnsBypassIp6": validation.Validate(ds.DNSBypassIP6, is.IPv6),
-		"dscp":         validation.Validate(ds.DSCP, validation.NotNil),
-		"geoLimit":     validation.Validate(ds.GeoLimit, validation.NotNil),
-		"geoProvider":  validation.Validate(ds.GeoProvider, validation.NotNil),
-		"infoUrl":      validation.Validate(ds.InfoURL, is.URL),
-		"initialDispersion": validation.Validate(ds.InitialDispersion,
-			validation.By(tovalidate.GreaterThanZero),
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"ipv6RoutingEnabled": validation.Validate(ds.IPV6RoutingEnabled,
-			validation.By(requiredIfMatchesTypeName([]string{SteeringRegexType, DNSRegexType, HTTPRegexType}, typeName))),
-		"logsEnabled": validation.Validate(ds.LogsEnabled, validation.NotNil),
-		"missLat": validation.Validate(ds.MissLat,
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"missLong": validation.Validate(ds.MissLong,
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"multiSiteOrigin": validation.Validate(ds.MultiSiteOrigin,
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"orgServerFqdn": validation.Validate(ds.OrgServerFQDN,
-			is.URL,
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"protocol": validation.Validate(ds.Protocol,
-			validation.By(requiredIfMatchesTypeName([]string{SteeringRegexType, DNSRegexType, HTTPRegexType}, typeName))),
-		"qstringIgnore": validation.Validate(ds.QStringIgnore,
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"rangeRequestHandling": validation.Validate(ds.RangeRequestHandling,
-			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
-		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking,
-			validation.NotNil),
-		"routingName": validation.Validate(ds.RoutingName,
-			isHost,
-			noPeriods,
-			validation.Length(1, 48)),
-		"typeId": validation.Validate(ds.TypeID,
-			validation.NotNil,
-			validation.By(tovalidate.GreaterThanZero)),
-		"xmlId": validation.Validate(ds.XMLID,
-			validation.Required,
-			noSpaces,
-			validation.Length(1, 48)),
-	}
-	return tovalidate.ToErrors(errs)
-}
-
-func requiredIfMatchesTypeName(patterns []string, typeName string) func(interface{}) error {
-	return func(value interface{}) error {
-
-		pattern := strings.Join(patterns, "|")
-		var err error
-		var match bool
-		if typeName != "" {
-			match, err = regexp.MatchString(pattern, typeName)
-			if match {
-				return fmt.Errorf("is required if type is '%s'", typeName)
-			}
-		}
-		return err
-	}
-}
-
-// TODO: drichardson - refactor to the types.go once implemented.
-func getTypeName(db *sqlx.DB, typeID int) (string, error) {
-
-	query := `SELECT name from type where id=$1`
-
-	var rows *sqlx.Rows
-	var err error
-
-	rows, err = db.Queryx(query, typeID)
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
-
-	typeResults := []tc.Type{}
-	for rows.Next() {
-		var s tc.Type
-		if err = rows.StructScan(&s); err != nil {
-			return "", fmt.Errorf("getting Type: %v", err)
-		}
-		typeResults = append(typeResults, s)
-	}
-
-	typeName := typeResults[0].Name
-	return typeName, err
+	return errs
 }
 
 //The TODeliveryService implementation of the Updater interface
@@ -265,11 +150,10 @@ func (ds *TODeliveryService) Insert(db *sqlx.DB, user auth.CurrentUser) (error, 
 		log.Error.Printf("could not begin transaction: %v", err)
 		return tc.DBError, tc.SystemError
 	}
-	fmt.Printf("ds ---> %v\n", ds)
 	resultRows, err := tx.NamedQuery(insertDSQuery(), ds)
 	if err != nil {
-		if pqerr, ok := err.(*pq.Error); ok {
-			err, eType := dbhelpers.ParsePQUniqueConstraintError(pqerr)
+		if err, ok := err.(*pq.Error); ok {
+			err, eType := dbhelpers.ParsePQUniqueConstraintError(err)
 			return errors.New("a delivery service with " + err.Error()), eType
 		} else {
 			log.Errorf("received non pq error: %++v from create execution", err)
