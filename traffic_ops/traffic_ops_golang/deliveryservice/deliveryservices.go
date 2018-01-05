@@ -22,10 +22,13 @@ package deliveryservice
 import (
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/dbhelpers"
@@ -62,11 +65,42 @@ func (ds *TODeliveryService) SetID(i int) {
 }
 
 func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
-	errs := []error{}
-	if ds.XMLID == nil {
-		errs = append(errs, errors.New(`ds 'xmlId' is required.`))
+	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
+	noSpaces.Error("cannot contain spaces")
+
+	// Custom Examples:
+	// Just add isCIDR as a parameter to Validate()
+	// isCIDR := validation.NewStringRule(govalidator.IsCIDR, "must be a valid CIDR address")
+	err := validation.Errors{
+		"active":              validation.Validate(ds.Active, validation.NotNil),
+		"cdnId":               validation.Validate(ds.CDNID, validation.NotNil),
+		"displayName":         validation.Validate(ds.DisplayName, validation.Required),
+		"dnsBypassIp":         validation.Validate(ds.DNSBypassIP, is.IP),
+		"dnsBypassIp6":        validation.Validate(ds.DNSBypassIP6, is.IPv6),
+		"dscp":                validation.Validate(ds.DSCP, validation.NotNil),
+		"geoLimit":            validation.Validate(ds.GeoLimit, validation.NotNil),
+		"geoProvider":         validation.Validate(ds.GeoProvider, validation.NotNil),
+		"infoUrl":             validation.Validate(ds.InfoURL, is.URL),
+		"logsEnabled":         validation.Validate(ds.LogsEnabled, validation.NotNil),
+		"orgServerFqdn":       validation.Validate(ds.OrgServerFQDN, is.URL),
+		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking, validation.NotNil),
+		"routingName":         validation.Validate(ds.RoutingName, validation.Length(1, 48)),
+		"typeId":              validation.Validate(ds.TypeID, validation.NotNil),
+		"xmlId":               validation.Validate(ds.XMLID, validation.Required, noSpaces, validation.Length(1, 48)),
 	}
-	return errs
+	return ToErrors(err)
+}
+
+// ToErrors - Flip to an array of errors
+func ToErrors(err map[string]error) []error {
+	vErrors := []error{}
+	for key, value := range err {
+		if value != nil {
+			errMsg := fmt.Sprintf("'%v' %v", key, value)
+			vErrors = append(vErrors, errors.New(errMsg))
+		}
+	}
+	return vErrors
 }
 
 //The TODeliveryService implementation of the Updater interface
