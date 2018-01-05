@@ -65,10 +65,10 @@ func (ds *TODeliveryService) SetID(i int) {
 }
 
 func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
-	return ds.Sanitize()
+	return ds.CheckFields()
 }
 
-func (ds *TODeliveryService) Sanitize() []error {
+func (ds *TODeliveryService) CheckFields() []error {
 	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
 	noSpaces.Error("cannot contain spaces")
 
