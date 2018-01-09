@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var FormDeliveryServiceController = function(deliveryService, type, types, $scope, $location, formUtils, locationUtils, tenantUtils, cdnService, profileService, tenantService) {
+var FormDeliveryServiceController = function(deliveryService, type, types, $scope, $location, formUtils, locationUtils, tenantUtils, cdnService, profileService, tenantService, propertiesModel) {
 
     var getCDNs = function() {
         cdnService.getCDNs()
@@ -45,6 +45,8 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
 
     $scope.deliveryService = deliveryService;
 
+    $scope.dsRequestsEnabled = propertiesModel.properties.dsRequests.enabled;
+
     $scope.edgeFQDNs = function(ds) {
         var urlString = '';
         if (_.isArray(ds.exampleURLs) && ds.exampleURLs.length > 0) {
@@ -58,7 +60,8 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
     $scope.DRAFT = 0;
     $scope.SUBMITTED = 1;
     $scope.REJECTED = 2;
-    $scope.COMPLETE = 3;
+    $scope.PENDING = 3;
+    $scope.COMPLETE = 4;
 
     $scope.types = _.filter(types, function(currentType) {
         var category;
@@ -215,5 +218,5 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
 
 };
 
-FormDeliveryServiceController.$inject = ['deliveryService', 'type', 'types', '$scope', '$location', 'formUtils', 'locationUtils', 'tenantUtils', 'cdnService', 'profileService', 'tenantService'];
+FormDeliveryServiceController.$inject = ['deliveryService', 'type', 'types', '$scope', '$location', 'formUtils', 'locationUtils', 'tenantUtils', 'cdnService', 'profileService', 'tenantService', 'propertiesModel'];
 module.exports = FormDeliveryServiceController;

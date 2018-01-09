@@ -24,7 +24,7 @@ CREATE TABLE deliveryservice_request (
     change_type change_types,
     id bigserial primary key NOT NULL,
     last_updated timestamp with time zone DEFAULT now(),
-    request json NOT NULL,
+    request jsonb NOT NULL,
     status workflow_states
 );
 
@@ -33,6 +33,8 @@ ALTER TABLE deliveryservice_request
 
 ALTER TABLE deliveryservice_request
     ADD CONSTRAINT fk_assignee FOREIGN KEY (assignee_id) REFERENCES tm_user(id) ON DELETE SET NULL;
+
+CREATE TRIGGER on_update_current_timestamp BEFORE UPDATE ON deliveryservice_request FOR EACH ROW EXECUTE PROCEDURE on_update_current_timestamp_last_updated();
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back

@@ -20,7 +20,6 @@ package request
  */
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,7 +30,6 @@ import (
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/dbhelpers"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/deliveryservice"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
@@ -69,30 +67,34 @@ func (request *TODeliveryServiceRequest) SetID(i int) {
 	request.ID = i
 }
 
-// Validate ...
-func (request *TODeliveryServiceRequest) Validate() []error {
-	log.Debugf("Got request with %++v\n", request)
-	var errs []error
-	if len(request.ChangeType) == 0 {
-		errs = append(errs, errors.New(`'change_type' is required`))
-	}
-	if len(request.Status) == 0 {
-		errs = append(errs, errors.New(`'status' is required`))
-	}
-	if len(request.Request) == 0 {
-		// TODO: validate request json has required deliveryservice fields
-		errs = append(errs, errors.New(`'request' is required`))
-	}
+// uniqQuery returns the query needed for a unique new request
+func uniqXMLIDQuery(ds tc.DeliveryService) string {
+	// no two active ds requests can exist for the same xmlid
+	q := `SELECT * FROM deliveryservice_request r 
+WHERE r.request->>'xml_id' = '` + ds.XMLID + `'
+AND r.status IN ('draft', 'submitted', 'pending')`
+	return q
+}
+
+func validRequest(db *sqlx.DB, request *TODeliveryServiceRequest) error {
+	// get the xmlid from the ds
 	var ds tc.DeliveryService
 	err := json.Unmarshal([]byte(request.Request), &ds)
 	if err != nil {
-		errs = append(errs, err)
-	} else {
-		e := deliveryservice.Validate(ds)
-		errs = append(errs, e...)
+		return err
 	}
-
-	return errs
+	r, err := db.Exec(uniqXMLIDQuery(ds))
+	if err != nil {
+		return err
+	}
+	n, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n > 1 {
+		return errors.New("multiple requests for the same xmlId")
+	}
+	return nil
 }
 
 //The TODeliveryServiceRequest implementation of the Updater interface
@@ -102,7 +104,7 @@ func (request *TODeliveryServiceRequest) Validate() []error {
 //generic error message returned
 
 // Update ...
-func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, ctx context.Context) (error, tc.ApiErrorType) {
+func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, user auth.CurrentUser) (error, tc.ApiErrorType) {
 	tx, err := db.Beginx()
 	defer func() {
 		if tx == nil {
@@ -116,7 +118,7 @@ func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, ctx context.Context
 	}()
 
 	if err != nil {
-		log.Error.Printf("could not begin transaction: %v", err)
+		log.Error.Println("could not begin transaction: ", err.Error())
 		return tc.DBError, tc.SystemError
 	}
 	log.Debugf("about to run exec query: %s with request: %++v", updateRequestQuery(), request)
@@ -129,7 +131,7 @@ func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, ctx context.Context
 			}
 			return err, eType
 		}
-		log.Errorf("received error: %++v from update execution", err)
+		log.Errorf("received error from update execution: %s", err.Error())
 		return tc.DBError, tc.SystemError
 	}
 	var lastUpdated tc.Time
@@ -137,11 +139,11 @@ func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, ctx context.Context
 	for resultRows.Next() {
 		rowsAffected++
 		if err := resultRows.Scan(&lastUpdated); err != nil {
-			log.Error.Printf("could not scan lastUpdated from insert: %s\n", err)
+			log.Error.Println("could not scan lastUpdated from insert: ", err.Error())
 			return tc.DBError, tc.SystemError
 		}
 	}
-	log.Debugf("lastUpdated: %++v", lastUpdated)
+	log.Debugln("lastUpdated: ", lastUpdated)
 	request.LastUpdated = lastUpdated
 	if rowsAffected < 1 {
 		return errors.New("no request found with this id"), tc.DataMissingError
@@ -149,6 +151,12 @@ func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, ctx context.Context
 	if rowsAffected > 1 {
 		return fmt.Errorf("this update affected too many rows: %d", rowsAffected), tc.SystemError
 	}
+
+	err = validRequest(db, request)
+	if err != nil {
+		return err, tc.SystemError
+	}
+
 	return nil, tc.NoError
 }
 
@@ -161,7 +169,7 @@ func (request *TODeliveryServiceRequest) Update(db *sqlx.DB, ctx context.Context
 //to be added to the struct
 
 // Insert ...
-func (request *TODeliveryServiceRequest) Insert(db *sqlx.DB, ctx context.Context) (error, tc.ApiErrorType) {
+func (request *TODeliveryServiceRequest) Insert(db *sqlx.DB, user auth.CurrentUser) (error, tc.ApiErrorType) {
 	tx, err := db.Beginx()
 	defer func() {
 		if tx == nil {
@@ -175,21 +183,18 @@ func (request *TODeliveryServiceRequest) Insert(db *sqlx.DB, ctx context.Context
 	}()
 
 	if err != nil {
-		log.Error.Printf("could not begin transaction: %v", err)
+		log.Error.Println("could not begin transaction: ", err.Error())
 		return tc.DBError, tc.SystemError
 	}
-	user, err := auth.GetCurrentUser(ctx)
-	if err != nil {
-		return err, tc.SystemError
-	}
-	ir := insertRequestQuery(user.ID)
+	request.AuthorID = user.ID
+	ir := insertRequestQuery()
 	resultRows, err := tx.NamedQuery(ir, request)
 	if err != nil {
 		if err, ok := err.(*pq.Error); ok {
 			err, eType := dbhelpers.ParsePQUniqueConstraintError(err)
 			return err, eType
 		}
-		log.Errorf("received non pq error: %++v from create execution", err)
+		log.Errorln("received non pq error from create execution: ", err.Error())
 		return tc.DBError, tc.SystemError
 	}
 	var id int
@@ -198,7 +203,7 @@ func (request *TODeliveryServiceRequest) Insert(db *sqlx.DB, ctx context.Context
 	for resultRows.Next() {
 		rowsAffected++
 		if err := resultRows.Scan(&id, &lastUpdated); err != nil {
-			log.Error.Printf("could not scan id from insert: %s\n", err)
+			log.Error.Println("could not scan id from insert: ", err.Error())
 			return tc.DBError, tc.SystemError
 		}
 	}
@@ -213,6 +218,10 @@ func (request *TODeliveryServiceRequest) Insert(db *sqlx.DB, ctx context.Context
 	}
 	request.SetID(id)
 	request.LastUpdated = lastUpdated
+	err = validRequest(db, request)
+	if err != nil {
+		return err, tc.SystemError
+	}
 	return nil, tc.NoError
 }
 
@@ -220,7 +229,7 @@ func (request *TODeliveryServiceRequest) Insert(db *sqlx.DB, ctx context.Context
 //all implementations of Deleter should use transactions and return the proper errorType
 
 // Delete ...
-func (request *TODeliveryServiceRequest) Delete(db *sqlx.DB, ctx context.Context) (error, tc.ApiErrorType) {
+func (request *TODeliveryServiceRequest) Delete(db *sqlx.DB, user auth.CurrentUser) (error, tc.ApiErrorType) {
 	tx, err := db.Beginx()
 	defer func() {
 		if tx == nil {
@@ -234,13 +243,13 @@ func (request *TODeliveryServiceRequest) Delete(db *sqlx.DB, ctx context.Context
 	}()
 
 	if err != nil {
-		log.Error.Printf("could not begin transaction: %v", err)
+		log.Error.Println("could not begin transaction: ", err.Error())
 		return tc.DBError, tc.SystemError
 	}
 	log.Debugf("about to run exec query: %s with request: %++v", deleteRequestQuery(), request)
 	result, err := tx.NamedExec(deleteRequestQuery(), request)
 	if err != nil {
-		log.Errorf("received error: %++v from delete execution", err)
+		log.Errorln("received error from delete execution: ", err.Error())
 		return tc.DBError, tc.SystemError
 	}
 	rowsAffected, err := result.RowsAffected()
@@ -267,8 +276,8 @@ WHERE id=:id RETURNING last_updated`
 	return query
 }
 
-func insertRequestQuery(authorID int) string {
-	query := fmt.Sprintf(`INSERT INTO deliveryservice_request (
+func insertRequestQuery() string {
+	query := `INSERT INTO deliveryservice_request (
 assignee_id,
 author_id,
 change_type,
@@ -276,11 +285,11 @@ request,
 status
 ) VALUES (
 :assignee_id,
-%d,
+:author_id,
 :change_type,
 :request,
 :status
-) RETURNING id,last_updated`, authorID)
+) RETURNING id,last_updated`
 	return query
 }
 
