@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
@@ -84,7 +85,6 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 
 	DNSRegexType := "^DNS.*$"
 	HTTPRegexType := "^HTTP.*$"
-	DNSorHTTPRegexType := DNSRegexType + "|" + HTTPRegexType
 	SteeringRegexType := "^STEERING.*$"
 	// Custom Examples:
 	// Just add isCIDR as a parameter to Validate()
@@ -102,31 +102,30 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 		"infoUrl":      validation.Validate(ds.InfoURL, is.URL),
 		"initialDispersion": validation.Validate(ds.InitialDispersion,
 			validation.By(greaterThanZero),
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"ipv6RoutingEnabled": validation.Validate(ds.IPV6RoutingEnabled,
 			validation.NotNil,
-			validation.By(requiredIfMatchesTypeName(SteeringRegexType, typeName)),
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{SteeringRegexType, DNSRegexType, HTTPRegexType}, typeName))),
 		"logsEnabled": validation.Validate(ds.LogsEnabled, validation.NotNil),
 		"missLat": validation.Validate(ds.MissLat,
 			is.Latitude,
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"missLong": validation.Validate(ds.MissLong,
 			is.Longitude,
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"multiSiteOrigin": validation.Validate(ds.MultiSiteOrigin,
 			is.URL,
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"orgServerFqdn": validation.Validate(ds.OrgServerFQDN,
 			is.URL,
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"protocol": validation.Validate(ds.Protocol,
-			validation.By(requiredIfMatchesTypeName(SteeringRegexType, typeName)),
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{SteeringRegexType}, typeName)),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"qstringIgnore": validation.Validate(ds.QStringIgnore,
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"rangeRequestHandling": validation.Validate(ds.RangeRequestHandling,
-			validation.By(requiredIfMatchesTypeName(DNSorHTTPRegexType, typeName))),
+			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking,
 			validation.NotNil),
 		"routingName": validation.Validate(ds.RoutingName,
@@ -151,9 +150,10 @@ func greaterThanZero(value interface{}) error {
 	return nil
 }
 
-func requiredIfMatchesTypeName(pattern string, typeName string) func(interface{}) error {
+func requiredIfMatchesTypeName(patterns []string, typeName string) func(interface{}) error {
 	return func(value interface{}) error {
 
+		pattern := strings.Join(patterns, "|")
 		//typeID, _ := value.(int)
 		var err error
 		var match bool
