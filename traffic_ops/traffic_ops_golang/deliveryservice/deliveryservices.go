@@ -65,36 +65,124 @@ func (ds *TODeliveryService) SetID(i int) {
 }
 
 func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
-	return ds.CheckFields()
-}
 
-func (ds *TODeliveryService) CheckFields() []error {
 	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
 	noSpaces.Error("cannot contain spaces")
 
+	var typeName string
+	var err error
+	if db != nil {
+		typeName, err = getTypeName(db, *ds.TypeID)
+		if err != nil {
+			return []error{err}
+		}
+	}
+
+	DNSRegexType := "^DNS.*$"
+	HTTPRegexType := "^HTTP.*$"
 	// Custom Examples:
 	// Just add isCIDR as a parameter to Validate()
 	// isCIDR := validation.NewStringRule(govalidator.IsCIDR, "must be a valid CIDR address")
-	err := validation.Errors{
-		"active":              validation.Validate(ds.Active, validation.NotNil),
-		"cdnId":               validation.Validate(ds.CDNID, validation.NotNil),
-		"displayName":         validation.Validate(ds.DisplayName, validation.Required),
-		"dnsBypassIp":         validation.Validate(ds.DNSBypassIP, is.IP),
-		"dnsBypassIp6":        validation.Validate(ds.DNSBypassIP6, is.IPv6),
-		"dscp":                validation.Validate(ds.DSCP, validation.NotNil),
-		"geoLimit":            validation.Validate(ds.GeoLimit, validation.NotNil),
-		"geoProvider":         validation.Validate(ds.GeoProvider, validation.NotNil),
-		"infoUrl":             validation.Validate(ds.InfoURL, is.URL),
-		"logsEnabled":         validation.Validate(ds.LogsEnabled, validation.NotNil),
-		"orgServerFqdn":       validation.Validate(ds.OrgServerFQDN, is.URL),
-		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking, validation.NotNil),
-		"routingName":         validation.Validate(ds.RoutingName, validation.Length(1, 48)),
-		"typeId":              validation.Validate(ds.TypeID, validation.NotNil),
-		"xmlId":               validation.Validate(ds.XMLID, validation.Required, noSpaces, validation.Length(1, 48)),
+	errs := validation.Errors{
+		"active":       validation.Validate(ds.Active, validation.NotNil),
+		"cdnId":        validation.Validate(ds.CDNID, validation.NotNil),
+		"displayName":  validation.Validate(ds.DisplayName, validation.Required),
+		"dnsBypassIp":  validation.Validate(ds.DNSBypassIP, is.IP),
+		"dnsBypassIp6": validation.Validate(ds.DNSBypassIP6, is.IPv6),
+		"dscp":         validation.Validate(ds.DSCP, validation.NotNil),
+		"geoLimit":     validation.Validate(ds.GeoLimit, validation.NotNil),
+		"geoProvider":  validation.Validate(ds.GeoProvider, validation.NotNil),
+		"infoUrl":      validation.Validate(ds.InfoURL, is.URL),
+		"initialDispersion": validation.Validate(ds.InitialDispersion,
+			validation.By(greaterThanZero),
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"ipv6RoutingEnabled": validation.Validate(ds.IPV6RoutingEnabled,
+			validation.NotNil,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"logsEnabled": validation.Validate(ds.LogsEnabled, validation.NotNil),
+		"missLat": validation.Validate(ds.MissLat,
+			is.Latitude,
+			validation.NotNil,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"missLong": validation.Validate(ds.MissLong,
+			is.Longitude,
+			validation.NotNil,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"multiSiteOrigin": validation.Validate(ds.MultiSiteOrigin,
+			is.Longitude,
+			validation.NotNil,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"orgServerFqdn": validation.Validate(ds.OrgServerFQDN, is.URL),
+		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking,
+			validation.NotNil),
+		"routingName": validation.Validate(ds.RoutingName,
+			validation.Length(1, 48)),
+		"typeId": validation.Validate(*ds.TypeID,
+			validation.NotNil,
+			validation.By(greaterThanZero)),
+		"xmlId": validation.Validate(ds.XMLID, validation.Required, noSpaces, validation.Length(1, 48)),
 	}
-	return ToErrors(err)
+	return ToErrors(errs)
 }
 
+// TODO: drichardson - move to tovalidate package
+func greaterThanZero(value interface{}) error {
+
+	idisp, _ := value.(int)
+	if idisp < 1 {
+		return errors.New("must be greater than zero")
+	}
+	return nil
+}
+
+func requiredIfMatchesTypeName(pattern string, typeName string) func(interface{}) error {
+	return func(value interface{}) error {
+
+		//typeID, _ := value.(int)
+		var err error
+		var match bool
+		if typeName != "" {
+			match, err = regexp.MatchString(pattern, typeName)
+			if match {
+				return fmt.Errorf("is required if type is '%s'", typeName)
+			}
+		}
+		return err
+	}
+}
+
+func getTypeName(db *sqlx.DB, typeID int) (string, error) {
+
+	query := `SELECT name from type where id=$1`
+
+	var rows *sqlx.Rows
+	var err error
+
+	rows, err = db.Queryx(query, typeID)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	typeResults := []tc.Type{}
+	for rows.Next() {
+		var s tc.Type
+		if err = rows.StructScan(&s); err != nil {
+			return "", fmt.Errorf("getting Type: %v", err)
+		}
+		typeResults = append(typeResults, s)
+	}
+
+	typeName := typeResults[0].Name
+	return typeName, err
+}
+
+// TODO: drichardson - move to tovalidate package
 // ToErrors - Flip to an array of errors
 func ToErrors(err map[string]error) []error {
 	vErrors := []error{}
@@ -188,10 +276,11 @@ func (ds *TODeliveryService) Insert(db *sqlx.DB, user auth.CurrentUser) (error, 
 		log.Error.Printf("could not begin transaction: %v", err)
 		return tc.DBError, tc.SystemError
 	}
+	fmt.Printf("ds ---> %v\n", ds)
 	resultRows, err := tx.NamedQuery(insertDSQuery(), ds)
 	if err != nil {
-		if err, ok := err.(*pq.Error); ok {
-			err, eType := dbhelpers.ParsePQUniqueConstraintError(err)
+		if pqerr, ok := err.(*pq.Error); ok {
+			err, eType := dbhelpers.ParsePQUniqueConstraintError(pqerr)
 			return errors.New("a delivery service with " + err.Error()), eType
 		} else {
 			log.Errorf("received non pq error: %++v from create execution", err)

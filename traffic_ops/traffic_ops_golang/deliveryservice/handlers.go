@@ -34,7 +34,7 @@ import (
 
 const DeliveryServicsPrivLevel = 10
 
-func GetHandler(db *sqlx.DB) http.HandlerFunc {
+func Handler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		handleErrs := tc.GetHandleErrorsFunc(w, r)
 
@@ -71,7 +71,7 @@ func GetHandler(db *sqlx.DB) http.HandlerFunc {
 func getDeliveryServicesResponse(q url.Values, db *sqlx.DB) (*tcapi.DeliveryServicesResponse, error) {
 	dses, err := getDeliveryServices(q, db)
 	if err != nil {
-		return nil, fmt.Errorf("getting CDNs response: %v", err)
+		return nil, fmt.Errorf("getting DeliveryServices response: %v", err)
 	}
 
 	resp := tcapi.DeliveryServicesResponse{
@@ -87,10 +87,7 @@ func getDeliveryServices(v url.Values, db *sqlx.DB) ([]tcapi.DeliveryService, er
 	// Query Parameters to Database Query column mappings
 	// see the fields mapped in the SQL query
 	queryParamsToQueryCols := map[string]string{
-		"domainName":    "domain_name",
-		"dnssecEnabled": "dnssec_enabled",
-		"id":            "id",
-		"name":          "name",
+		"xmlId": "xml_id",
 	}
 
 	query, queryValues := dbhelpers.BuildQuery(v, selectDSesQuery(), queryParamsToQueryCols)

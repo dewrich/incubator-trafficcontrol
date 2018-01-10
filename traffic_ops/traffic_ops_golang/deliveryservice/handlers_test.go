@@ -53,7 +53,7 @@ func TestValidate1(t *testing.T) {
 		return
 	}
 
-	errors := ds.CheckFields()
+	errors := ds.Validate(nil)
 	fmt.Printf("errors ---> %v\n", errors)
 
 	//if len(expected) != len(errors) {
@@ -82,7 +82,7 @@ func TestValidate2(t *testing.T) {
 		return
 	}
 	var refType = TODeliveryService(ds)
-	errors := refType.CheckFields()
+	errors := refType.Validate(nil)
 	// Test the routingName length
 	routingName := strings.Repeat("#", 48)
 	ds.RoutingName = routingName
@@ -217,7 +217,7 @@ const testCase = `
    "httpBypassFqdn": "http://bypass",
    "id": 1,
    "infoUrl": "http://info.url",
-   "initialDispersion": 0,
+   "initialDispersion": 1,
    "ipv6RoutingEnabled": false,
    "lastUpdated": "2017-01-05 15:04:05+00",
    "logsEnabled": true,

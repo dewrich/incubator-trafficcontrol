@@ -32,6 +32,7 @@ import (
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/api"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/cdn"
+	ds "github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/deliveryservice"
 	request "github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/deliveryservice/request"
 	"github.com/basho/riak-go-client"
 )
@@ -69,6 +70,7 @@ func Routes(d ServerData) ([]Route, http.Handler, error) {
 		{1.3, http.MethodPost, `deliveryservice_requests/?$`, api.CreateHandler(request.GetRefType(), d.DB), request.DeliveryServiceRequestPrivLevel, Authenticated, nil},
 		{1.3, http.MethodDelete, `deliveryservice_requests/{id}$`, api.DeleteHandler(request.GetRefType(), d.DB), request.DeliveryServiceRequestPrivLevel, Authenticated, nil},
 
+		{1.3, http.MethodPost, `deliveryservices-wip$`, api.CreateHandler(ds.GetRefType(), d.DB), auth.PrivLevelAdmin, Authenticated, nil},
 		{1.3, http.MethodGet, `deliveryservices/{xmlID}/urisignkeys$`, getURIsignkeysHandler(d.DB, d.Config), auth.PrivLevelAdmin, Authenticated, nil},
 		{1.3, http.MethodPost, `deliveryservices/{xmlID}/urisignkeys$`, saveDeliveryServiceURIKeysHandler(d.DB, d.Config), auth.PrivLevelAdmin, Authenticated, nil},
 		{1.3, http.MethodPut, `deliveryservices/{xmlID}/urisignkeys$`, saveDeliveryServiceURIKeysHandler(d.DB, d.Config), auth.PrivLevelAdmin, Authenticated, nil},

@@ -33,7 +33,7 @@ type DeliveryService struct {
 	// NOTE: the db: struct tags are used for testing to map to their equivalent database column (if there is one)
 	//
 	Active                   *bool                  `json:"active" db:"active"`
-	CacheURL                 string                 `json:"cacheurl" db:"cache_url"`
+	CacheURL                 string                 `json:"cacheurl" db:"cacheurl"`
 	CCRDNSTTL                int                    `json:"ccrDnsTtl" db:"ccr_dns_ttl"`
 	CDNID                    *int                   `json:"cdnId" db:"cdn_id"`
 	CheckPath                string                 `json:"checkPath" db:"check_path"`
@@ -54,9 +54,9 @@ type DeliveryService struct {
 	HTTPBypassFQDN           string                 `json:"httpBypassFqdn" db:"http_bypass_fqdn"`
 	ID                       int                    `json:"id" db:"id"`
 	InfoURL                  string                 `json:"infoUrl" db:"info_url"`
-	InitialDispersion        int                    `json:"initialDispersion" db:"initial_dispersion"`
+	InitialDispersion        *int                   `json:"initialDispersion" db:"initial_dispersion"`
 	IPV6RoutingEnabled       bool                   `json:"ipv6RoutingEnabled" db:"ipv6_routing_enabled"`
-	LastUpdated              tc.Time                `json:"lastUpdated" db:"last_updated db:"last_updated""`
+	LastUpdated              tc.Time                `json:"lastUpdated" db:"last_updated""`
 	LogsEnabled              *bool                  `json:"logsEnabled" db:"logs_enabled"`
 	LongDesc                 string                 `json:"longDesc" db:"long_desc"`
 	LongDesc1                string                 `json:"longDesc1" db:"long_desc_1"`
@@ -64,10 +64,11 @@ type DeliveryService struct {
 	MatchList                []DeliveryServiceMatch `json:"matchList,omitempty"`
 	MaxDNSAnswers            int                    `json:"maxDnsAnswers" db:"max_dns_answers"`
 	MidHeaderRewrite         string                 `json:"midHeaderRewrite" db:"mid_header_rewrite"`
-	MissLat                  float64                `json:"missLat" db:"miss_lat"`
-	MissLong                 float64                `json:"missLong" db:"miss_long"`
+	MissLat                  *float64               `json:"missLat" db:"miss_lat"`
+	MissLong                 *float64               `json:"missLong" db:"miss_long"`
 	MultiSiteOrigin          bool                   `json:"multiSiteOrigin" db:"multi_site_origin"`
 	MultiSiteOriginAlgorithm int                    `json:"multiSiteOriginAlgorithm" db:"multi_site_origin_algorithm"`
+	OriginShield             string                 `json:"originShield" db:"origin_shield"`
 	OrgServerFQDN            string                 `json:"orgServerFqdn" db:"org_server_fqdn"`
 	ProfileDesc              string                 `json:"profileDescription"`
 	ProfileID                int                    `json:"profileId,omitempty" db:"profile"`
