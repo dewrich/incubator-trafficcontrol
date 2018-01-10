@@ -27,6 +27,7 @@ import (
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
+	"github.com/asaskevich/govalidator"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 
@@ -69,6 +70,9 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 	noSpaces := validation.Match(regexp.MustCompile("^\\S*$"))
 	noSpaces.Error("cannot contain spaces")
 
+	noPeriods := validation.Match(regexp.MustCompile("^[^\\.]*$"))
+	noPeriods.Error("cannot contain periods")
+
 	var typeName string
 	var err error
 	if db != nil {
@@ -80,9 +84,11 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 
 	DNSRegexType := "^DNS.*$"
 	HTTPRegexType := "^HTTP.*$"
+	SteeringRegexType := "^STEERING.*$"
 	// Custom Examples:
 	// Just add isCIDR as a parameter to Validate()
 	// isCIDR := validation.NewStringRule(govalidator.IsCIDR, "must be a valid CIDR address")
+	isHost := validation.NewStringRule(govalidator.IsHost, "must be a valid hostname")
 	errs := validation.Errors{
 		"active":       validation.Validate(ds.Active, validation.NotNil),
 		"cdnId":        validation.Validate(ds.CDNID, validation.NotNil),
@@ -100,27 +106,40 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 		"ipv6RoutingEnabled": validation.Validate(ds.IPV6RoutingEnabled,
 			validation.NotNil,
 			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(SteeringRegexType, typeName)),
 			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
 		"logsEnabled": validation.Validate(ds.LogsEnabled, validation.NotNil),
 		"missLat": validation.Validate(ds.MissLat,
 			is.Latitude,
-			validation.NotNil,
 			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
 			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
 		"missLong": validation.Validate(ds.MissLong,
 			is.Longitude,
-			validation.NotNil,
 			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
 			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
 		"multiSiteOrigin": validation.Validate(ds.MultiSiteOrigin,
-			is.Longitude,
-			validation.NotNil,
+			is.URL,
 			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
 			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
-		"orgServerFqdn": validation.Validate(ds.OrgServerFQDN, is.URL),
+		"orgServerFqdn": validation.Validate(ds.OrgServerFQDN,
+			is.URL,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"protocol": validation.Validate(ds.Protocol,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(SteeringRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"qstringIgnore": validation.Validate(ds.QStringIgnore,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
+		"rangeRequestHandling": validation.Validate(ds.RangeRequestHandling,
+			validation.By(requiredIfMatchesTypeName(DNSRegexType, typeName)),
+			validation.By(requiredIfMatchesTypeName(HTTPRegexType, typeName))),
 		"regionalGeoBlocking": validation.Validate(ds.RegionalGeoBlocking,
 			validation.NotNil),
 		"routingName": validation.Validate(ds.RoutingName,
+			isHost,
+			noPeriods,
 			validation.Length(1, 48)),
 		"typeId": validation.Validate(*ds.TypeID,
 			validation.NotNil,
