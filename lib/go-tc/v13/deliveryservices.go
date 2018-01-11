@@ -64,8 +64,8 @@ type DeliveryService struct {
 	MatchList                []DeliveryServiceMatch `json:"matchList,omitempty"`
 	MaxDNSAnswers            int                    `json:"maxDnsAnswers" db:"max_dns_answers"`
 	MidHeaderRewrite         string                 `json:"midHeaderRewrite" db:"mid_header_rewrite"`
-	MissLat                  *float64               `json:"missLat" db:"miss_lat"`
-	MissLong                 *float64               `json:"missLong" db:"miss_long"`
+	MissLat                  float64                `json:"missLat" db:"miss_lat"`
+	MissLong                 float64                `json:"missLong" db:"miss_long"`
 	MultiSiteOrigin          bool                   `json:"multiSiteOrigin" db:"multi_site_origin"`
 	MultiSiteOriginAlgorithm int                    `json:"multiSiteOriginAlgorithm" db:"multi_site_origin_algorithm"`
 	OriginShield             string                 `json:"originShield" db:"origin_shield"`

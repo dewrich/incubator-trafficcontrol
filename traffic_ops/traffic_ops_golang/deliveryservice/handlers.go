@@ -93,6 +93,8 @@ func getDeliveryServices(v url.Values, db *sqlx.DB) ([]tcapi.DeliveryService, er
 	query, queryValues := dbhelpers.BuildQuery(v, selectDSesQuery(), queryParamsToQueryCols)
 
 	rows, err = db.NamedQuery(query, queryValues)
+	fmt.Printf("rows ---> %v\n", rows)
+	fmt.Printf("err ---> %v\n", err)
 	if err != nil {
 		return nil, err
 	}
@@ -112,16 +114,16 @@ func getDeliveryServices(v url.Values, db *sqlx.DB) ([]tcapi.DeliveryService, er
 func selectDSesQuery() string {
 	query := `SELECT
  active,
- cacheurl,
  ccr_dns_ttl,
  cdn_id,
+ cacheurl,
  check_path,
- display_name,
  dns_bypass_cname,
  dns_bypass_ip,
  dns_bypass_ip6,
  dns_bypass_ttl,
  dscp,
+ display_name,
  edge_header_rewrite,
  geo_limit,
  geo_limit_countries,
@@ -131,9 +133,9 @@ func selectDSesQuery() string {
  global_max_tps,
  http_bypass_fqdn,
  id,
+ ipv6_routing_enabled,
  info_url,
  initial_dispersion,
- ipv6_routing_enabled,
  last_updated,
  logs_enabled,
  long_desc,
@@ -155,11 +157,11 @@ func selectDSesQuery() string {
  regional_geo_blocking,
  remap_text,
  routing_name,
- signing_algorithm,
  ssl_key_version,
- tenant_id,
+ signing_algorithm,
  tr_request_headers,
  tr_response_headers,
+ tenant_id,
  type,
  xml_id
 

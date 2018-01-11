@@ -34,6 +34,7 @@ import (
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/dbhelpers"
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/tovalidate"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
@@ -101,17 +102,15 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 		"geoProvider":  validation.Validate(ds.GeoProvider, validation.NotNil),
 		"infoUrl":      validation.Validate(ds.InfoURL, is.URL),
 		"initialDispersion": validation.Validate(ds.InitialDispersion,
-			validation.By(greaterThanZero),
+			validation.By(tovalidate.GreaterThanZero),
 			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"ipv6RoutingEnabled": validation.Validate(ds.IPV6RoutingEnabled,
 			validation.NotNil,
 			validation.By(requiredIfMatchesTypeName([]string{SteeringRegexType, DNSRegexType, HTTPRegexType}, typeName))),
 		"logsEnabled": validation.Validate(ds.LogsEnabled, validation.NotNil),
 		"missLat": validation.Validate(ds.MissLat,
-			is.Latitude,
 			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"missLong": validation.Validate(ds.MissLong,
-			is.Longitude,
 			validation.By(requiredIfMatchesTypeName([]string{DNSRegexType, HTTPRegexType}, typeName))),
 		"multiSiteOrigin": validation.Validate(ds.MultiSiteOrigin,
 			is.URL,
@@ -133,27 +132,16 @@ func (ds *TODeliveryService) Validate(db *sqlx.DB) []error {
 			validation.Length(1, 48)),
 		"typeId": validation.Validate(*ds.TypeID,
 			validation.NotNil,
-			validation.By(greaterThanZero)),
+			validation.By(tovalidate.GreaterThanZero)),
 		"xmlId": validation.Validate(ds.XMLID, validation.Required, noSpaces, validation.Length(1, 48)),
 	}
-	return ToErrors(errs)
-}
-
-// TODO: drichardson - move to tovalidate package
-func greaterThanZero(value interface{}) error {
-
-	idisp, _ := value.(int)
-	if idisp < 1 {
-		return errors.New("must be greater than zero")
-	}
-	return nil
+	return tovalidate.ToErrors(errs)
 }
 
 func requiredIfMatchesTypeName(patterns []string, typeName string) func(interface{}) error {
 	return func(value interface{}) error {
 
 		pattern := strings.Join(patterns, "|")
-		//typeID, _ := value.(int)
 		var err error
 		var match bool
 		if typeName != "" {
@@ -190,19 +178,6 @@ func getTypeName(db *sqlx.DB, typeID int) (string, error) {
 
 	typeName := typeResults[0].Name
 	return typeName, err
-}
-
-// TODO: drichardson - move to tovalidate package
-// ToErrors - Flip to an array of errors
-func ToErrors(err map[string]error) []error {
-	vErrors := []error{}
-	for key, value := range err {
-		if value != nil {
-			errMsg := fmt.Sprintf("'%v' %v", key, value)
-			vErrors = append(vErrors, errors.New(errMsg))
-		}
-	}
-	return vErrors
 }
 
 //The TODeliveryService implementation of the Updater interface

@@ -27,7 +27,7 @@ import (
 )
 
 // Validate ...
-func TestValidate(t *testing.T) {
+func TestValidateDan(t *testing.T) {
 	displayName := "this is gonna be a name that's a little longer than the limit of 48 chars.."
 
 	ds := tc.DeliveryService{
