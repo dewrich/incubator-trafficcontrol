@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var FormDeliveryServiceController = function(deliveryService, type, types, $scope, $location, formUtils, locationUtils, tenantUtils, cdnService, profileService, tenantService, propertiesModel) {
+var FormDeliveryServiceController = function(deliveryService, dsOriginal, type, types, $scope, $location, formUtils, locationUtils, tenantUtils, cdnService, profileService, tenantService, propertiesModel) {
 
     var getCDNs = function() {
         cdnService.getCDNs()
@@ -44,6 +44,8 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
     };
 
     $scope.deliveryService = deliveryService;
+
+    $scope.dsOriginal = dsOriginal; // this ds is used primarily for showing the diff between a ds request and the original DS
 
     $scope.dsRequestsEnabled = propertiesModel.properties.dsRequests.enabled;
 
@@ -226,5 +228,5 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
 
 };
 
-FormDeliveryServiceController.$inject = ['deliveryService', 'type', 'types', '$scope', '$location', 'formUtils', 'locationUtils', 'tenantUtils', 'cdnService', 'profileService', 'tenantService', 'propertiesModel'];
+FormDeliveryServiceController.$inject = ['deliveryService', 'dsOriginal', 'type', 'types', '$scope', '$location', 'formUtils', 'locationUtils', 'tenantUtils', 'cdnService', 'profileService', 'tenantService', 'propertiesModel'];
 module.exports = FormDeliveryServiceController;
