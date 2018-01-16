@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var FormDeliveryServiceController = function(deliveryService, type, types, $scope, $location, formUtils, locationUtils, tenantUtils, cdnService, profileService, tenantService) {
+var FormDeliveryServiceController = function(deliveryService, dsOriginal, type, types, $scope, $location, formUtils, locationUtils, tenantUtils, cdnService, profileService, tenantService, propertiesModel) {
 
     var getCDNs = function() {
         cdnService.getCDNs()
@@ -45,6 +45,10 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
 
     $scope.deliveryService = deliveryService;
 
+    $scope.dsOriginal = dsOriginal; // this ds is used primarily for showing the diff between a ds request and the original DS
+
+    $scope.dsRequestsEnabled = propertiesModel.properties.dsRequests.enabled;
+
     $scope.edgeFQDNs = function(ds) {
         var urlString = '';
         if (_.isArray(ds.exampleURLs) && ds.exampleURLs.length > 0) {
@@ -53,6 +57,20 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
             }
         }
         return urlString;
+    };
+
+    $scope.DRAFT = 0;
+    $scope.SUBMITTED = 1;
+    $scope.REJECTED = 2;
+    $scope.PENDING = 3;
+    $scope.COMPLETE = 4;
+
+    $scope.saveable = function() {
+        return true;
+    };
+
+    $scope.deletable = function() {
+        return true;
     };
 
     $scope.types = _.filter(types, function(currentType) {
@@ -159,6 +177,10 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
         return '-'.repeat(tenant.level) + ' ' + tenant.name;
     };
 
+    $scope.showDiff = function() {
+        alert('todo: show diff');
+    };
+
     $scope.viewTargets = function() {
         $location.path($location.path() + '/targets');
     };
@@ -206,5 +228,5 @@ var FormDeliveryServiceController = function(deliveryService, type, types, $scop
 
 };
 
-FormDeliveryServiceController.$inject = ['deliveryService', 'type', 'types', '$scope', '$location', 'formUtils', 'locationUtils', 'tenantUtils', 'cdnService', 'profileService', 'tenantService'];
+FormDeliveryServiceController.$inject = ['deliveryService', 'dsOriginal', 'type', 'types', '$scope', '$location', 'formUtils', 'locationUtils', 'tenantUtils', 'cdnService', 'profileService', 'tenantService', 'propertiesModel'];
 module.exports = FormDeliveryServiceController;
