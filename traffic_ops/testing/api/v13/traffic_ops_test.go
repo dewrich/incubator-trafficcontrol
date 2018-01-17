@@ -24,14 +24,14 @@ import (
 
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/test"
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/todb"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/towrap"
 	_ "github.com/lib/pq"
 )
 
 var (
 	TOSession *client.Session
-	cfg       Config
+	cfg       cfg.Config
 	testData  TrafficControl
 )
 
@@ -61,23 +61,23 @@ func TestMain(m *testing.M) {
 			   DB Ssl:               %t`, *configFileName, *tcFixturesFileName, cfg.TrafficOps.URL, cfg.Default.Session.TimeoutInSecs, cfg.TrafficOpsDB.Hostname, cfg.TrafficOpsDB.User, cfg.TrafficOpsDB.Name, cfg.TrafficOpsDB.SSL)
 
 	//Load the test data
-	test.LoadFixtures(*tcFixturesFileName)
+	LoadFixtures(*tcFixturesFileName)
 
 	var db *sql.DB
-	db, err = db.OpenConnection(&cfg)
+	db, err = todb.OpenConnection(&cfg)
 	if err != nil {
 		fmt.Printf("\nError opening connection to %s - %s, %v\n", cfg.TrafficOps.URL, cfg.TrafficOps.User, err)
 		os.Exit(1)
 	}
 	defer db.Close()
 
-	err = db.Teardown(&cfg, db)
+	err = todb.Teardown(&cfg, db)
 	if err != nil {
 		fmt.Printf("\nError tearingdown data %s - %s, %v\n", cfg.TrafficOps.URL, cfg.TrafficOps.User, err)
 		os.Exit(1)
 	}
 
-	err = db.SetupTestData(&cfg, db)
+	err = todb.SetupTestData(&cfg, db)
 	if err != nil {
 		fmt.Printf("\nError setting up data %s - %s, %v\n", cfg.TrafficOps.URL, cfg.TrafficOps.User, err)
 		os.Exit(1)

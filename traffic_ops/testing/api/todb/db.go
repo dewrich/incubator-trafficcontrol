@@ -13,13 +13,14 @@
    limitations under the License.
 */
 
-package db
+package todb
 
 import (
 	"database/sql"
 	"fmt"
 
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/cfg"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
 )
 
@@ -28,7 +29,7 @@ var (
 )
 
 // OpenConnection ...
-func OpenConnection(cfg *Config) (*sql.DB, error) {
+func OpenConnection(cfg *cfg.Config) (*sql.DB, error) {
 	var err error
 	sslStr := "require"
 	if !cfg.TrafficOpsDB.SSL {
@@ -45,7 +46,7 @@ func OpenConnection(cfg *Config) (*sql.DB, error) {
 }
 
 // SetupTestData ...
-func SetupTestData(cfg *Config, db *sql.DB) error {
+func SetupTestData(cfg *cfg.Config, db *sql.DB) error {
 
 	log.Debugln("Setting up initial user data")
 	var err error
@@ -104,7 +105,7 @@ func SetupTestData(cfg *Config, db *sql.DB) error {
 }
 
 // Teardown - ensures that the data is cleaned up for a fresh run
-func Teardown(cfg *Config, db *sql.DB) error {
+func Teardown(cfg *cfg.Config, db *sql.DB) error {
 	log.Debugln("Tearing down data")
 	tx, err := db.Begin()
 	if err != nil {
