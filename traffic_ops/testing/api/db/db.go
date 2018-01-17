@@ -13,7 +13,7 @@
    limitations under the License.
 */
 
-package api
+package db
 
 import (
 	"database/sql"
@@ -27,7 +27,8 @@ var (
 	db *sql.DB
 )
 
-func openConnection(cfg *Config) (*sql.DB, error) {
+// OpenConnection ...
+func OpenConnection(cfg *Config) (*sql.DB, error) {
 	var err error
 	sslStr := "require"
 	if !cfg.TrafficOpsDB.SSL {
@@ -43,7 +44,8 @@ func openConnection(cfg *Config) (*sql.DB, error) {
 	return db, err
 }
 
-func setupUserData(cfg *Config, db *sql.DB) error {
+// SetupTestData ...
+func SetupTestData(cfg *Config, db *sql.DB) error {
 
 	log.Debugln("Setting up initial user data")
 	var err error
@@ -101,8 +103,8 @@ func setupUserData(cfg *Config, db *sql.DB) error {
 	return nil
 }
 
-// ensures that the data is cleaned up for a fresh run
-func teardownData(cfg *Config, db *sql.DB) error {
+// Teardown - ensures that the data is cleaned up for a fresh run
+func Teardown(cfg *Config, db *sql.DB) error {
 	log.Debugln("Tearing down data")
 	tx, err := db.Begin()
 	if err != nil {
