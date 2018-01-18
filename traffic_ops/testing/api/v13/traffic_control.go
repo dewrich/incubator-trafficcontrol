@@ -15,7 +15,7 @@
 
 package v13
 
-import tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc/v13"
+import tcapi "github.com/apache/incubator-trafficcontrol/lib/go-tc"
 
 // TrafficControl - maps to the tc-fixtures.json file
 type TrafficControl struct {

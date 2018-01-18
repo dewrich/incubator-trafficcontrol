@@ -23,15 +23,16 @@ import (
 	"testing"
 
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	to "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/config"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/todb"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/towrap"
 	_ "github.com/lib/pq"
 )
 
 var (
-	TOSession *client.Session
-	cfg       cfg.Config
+	TOSession *to.Session
+	cfg       config.Config
 	testData  TrafficControl
 )
 
@@ -41,7 +42,7 @@ func TestMain(m *testing.M) {
 	tcFixturesFileName := flag.String("fixtures", "tc-fixtures.json", "The test fixtures for the API test tool")
 	flag.Parse()
 
-	if cfg, err = cfg.LoadConfig(*configFileName); err != nil {
+	if cfg, err = config.LoadConfig(*configFileName); err != nil {
 		fmt.Printf("Error Loading Config %v %v\n", cfg, err)
 	}
 

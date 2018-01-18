@@ -20,15 +20,16 @@ import (
 	"time"
 
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/client"
-	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/cfg"
+	to "github.com/apache/incubator-trafficcontrol/traffic_ops/client"
+	"github.com/apache/incubator-trafficcontrol/traffic_ops/testing/api/config"
 )
 
-func SetupSession(cfg cfg.Config, toURL string, toUser string, toPass string) (*client.Session, net.Addr, error) {
+func SetupSession(cfg config.Config, toURL string, toUser string, toPass string) (*client.Session, net.Addr, error) {
 	var err error
 	var session *client.Session
 	var netAddr net.Addr
 	toReqTimeout := time.Second * time.Duration(cfg.Default.Session.TimeoutInSecs)
-	session, netAddr, err = client.LoginWithAgent(toURL, toUser, toPass, true, "to-api-client-tests", true, toReqTimeout)
+	session, netAddr, err = to.LoginWithAgent(toURL, toUser, toPass, true, "to-api-client-tests", true, toReqTimeout)
 	if err != nil {
 		return nil, nil, err
 	}
