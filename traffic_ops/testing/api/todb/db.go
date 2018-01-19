@@ -55,6 +55,12 @@ func SetupTestData(cfg *config.Config, db *sql.DB) error {
 		os.Exit(1)
 	}
 
+	err = SetupTmusers(cfg, db)
+	if err != nil {
+		fmt.Printf("\nError setting up tm_users %s - %s, %v\n", cfg.TrafficOps.URL, cfg.TrafficOps.User, err)
+		os.Exit(1)
+	}
+
 	err = SetupTypes(cfg, db)
 	if err != nil {
 		fmt.Printf("\nError setting up types %s - %s, %v\n", cfg.TrafficOps.URL, cfg.TrafficOps.User, err)
@@ -66,7 +72,7 @@ func SetupTestData(cfg *config.Config, db *sql.DB) error {
 // SetupRoles ...
 func SetupRoles(cfg *config.Config, db *sql.DB) error {
 
-	log.Debugln("Setting up test data")
+	log.Debugln("- role data")
 	var err error
 
 	tx, err := db.Begin()
@@ -74,43 +80,15 @@ func SetupRoles(cfg *config.Config, db *sql.DB) error {
 		return fmt.Errorf("transaction begin failed %v %v ", err, tx)
 	}
 
-	res, err := tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (1, 'disallowed','Block all access',0) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-
-	res, err = tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (2, 'read-only user','Block all access', 10) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-
-	res, err = tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (3, 'operations','Block all access', 20) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-	res, err = tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (4, 'admin','super-user', 30) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-	res, err = tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (5, 'portal','Portal User', 2) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-	res, err = tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (6, 'migrations','database migrations user - DO NOT REMOVE', 20) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-	res, err = tx.Exec("INSERT INTO role (id, name, description, priv_level) VALUES (7, 'federation','Role for Secondary CZF', 15) ON CONFLICT DO NOTHING")
-	if err != nil {
-		return fmt.Errorf("exec failed %v %v", err, res)
-	}
-
-	encryptedPassword, err := auth.DerivePassword(cfg.TrafficOps.UserPassword)
-	if err != nil {
-		return fmt.Errorf("password encryption failed %v", err)
-	}
-	itm := `INSERT INTO tm_user (username, local_passwd, confirm_local_passwd, role) VALUES ('admin','` + encryptedPassword + `','` + encryptedPassword + `', 4)`
-	res, err = tx.Exec(itm)
+	inserts := `
+INSERT INTO role (id, name, description, priv_level) VALUES (1, 'disallowed','Block all access',0) ON CONFLICT DO NOTHING;
+INSERT INTO role (id, name, description, priv_level) VALUES (2, 'read-only user','Block all access', 10) ON CONFLICT DO NOTHING;
+INSERT INTO role (id, name, description, priv_level) VALUES (3, 'operations','Block all access', 20) ON CONFLICT DO NOTHING;
+INSERT INTO role (id, name, description, priv_level) VALUES (4, 'admin','super-user', 30) ON CONFLICT DO NOTHING;
+INSERT INTO role (id, name, description, priv_level) VALUES (5, 'portal','Portal User', 2) ON CONFLICT DO NOTHING;
+INSERT INTO role (id, name, description, priv_level) VALUES (7, 'federation','Role for Secondary CZF', 15) ON CONFLICT DO NOTHING;
+`
+	res, err := tx.Exec(inserts)
 	if err != nil {
 		return fmt.Errorf("exec failed %v %v", err, res)
 	}
@@ -122,10 +100,37 @@ func SetupRoles(cfg *config.Config, db *sql.DB) error {
 	return nil
 }
 
+// SetupTmusers ...
+func SetupTmusers(cfg *config.Config, db *sql.DB) error {
+
+	log.Debugln("- tm_user data")
+	var err error
+
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("transaction begin failed %v %v ", err, tx)
+	}
+
+	encryptedPassword, err := auth.DerivePassword(cfg.TrafficOps.UserPassword)
+	if err != nil {
+		return fmt.Errorf("password encryption failed %v", err)
+	}
+	itm := `INSERT INTO tm_user (username, local_passwd, confirm_local_passwd, role) VALUES ('admin','` + encryptedPassword + `','` + encryptedPassword + `', 4)`
+	res, err := tx.Exec(itm)
+	if err != nil {
+		return fmt.Errorf("exec failed %v %v", err, res)
+	}
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("commit failed %v %v", err, res)
+	}
+	return nil
+}
+
 // SetupTypes ...
 func SetupTypes(cfg *config.Config, db *sql.DB) error {
 
-	log.Debugln("Setting up Types")
+	log.Debugln("- type data")
 	var err error
 
 	tx, err := db.Begin()
