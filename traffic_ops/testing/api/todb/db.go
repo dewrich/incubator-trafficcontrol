@@ -165,7 +165,6 @@ INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (33,
 INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (34, 'CONFIG_EXTENSION', 'Extension for additional configuration file', 'to_extension', '2015-02-04 18:03:30.000000');
 INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (35, 'STATISTIC_EXTENSION', 'Extension source for 12M graphs', 'to_extension', '2015-02-04 18:03:30.000000');
 INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (41, 'RIAK', 'Riak keystore', 'server', '2015-03-03 17:18:08.000000');
-INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (48, 'SPLUNK', 'SPLUNK indexer search head etc', 'server', '2015-03-19 15:28:40.000000');
 INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (68, 'TRAFFIC_STATS', 'traffic_stats server', 'server', '2015-05-13 15:56:10.000000');
 INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (69, 'INFLUXDB', 'influxDb server', 'server', '2015-05-13 15:56:10.000000');
 INSERT INTO type (id, name, description, use_in_table, last_updated) VALUES (70, 'ANY_MAP', 'No Content Routing - arbitrary remap at the edge, no Traffic Router config', 'deliveryservice', '2015-07-01 15:25:41.000000');
