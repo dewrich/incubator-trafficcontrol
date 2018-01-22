@@ -836,7 +836,7 @@ func Teardown(cfg *config.Config, db *sql.DB) error {
 	DELETE FROM cdn;
 	DELETE FROM tenant;
 `
-	err := execSQL(cfg, db, sqlStmt, "deleting, tearing down")
+	err := execSQL(cfg, db, sqlStmt, "Tearing down")
 	if err != nil {
 		return fmt.Errorf("exec failed %v", err)
 	}
@@ -846,7 +846,7 @@ func Teardown(cfg *config.Config, db *sql.DB) error {
 // execSQL ...
 func execSQL(cfg *config.Config, db *sql.DB, sqlStmt string, dbTable string) error {
 
-	log.Debugln("setting up " + dbTable + " data")
+	log.Debugln(dbTable + " data")
 	var err error
 
 	tx, err := db.Begin()
