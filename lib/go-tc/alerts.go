@@ -68,11 +68,20 @@ func GetHandleErrorsFunc(w http.ResponseWriter, r *http.Request) func(status int
 		w.Header().Set(ContentType, ApplicationJson)
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx,StatusKey,status)
+		ctx = context.WithValue(ctx, StatusKey, status)
 		*r = *r.WithContext(ctx)
 
 		fmt.Fprintf(w, "%s", errBytes)
 	}
+}
+
+func (alerts *Alerts) ToStrings() []string {
+	alertStrs := []string{}
+	for _, alrt := range alerts.Alerts {
+		at := alrt.Text
+		alertStrs = append(alertStrs, at)
+	}
+	return alertStrs
 }
 
 var StatusKey = "status"
