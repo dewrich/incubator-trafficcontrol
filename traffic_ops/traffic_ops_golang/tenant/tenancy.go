@@ -22,6 +22,7 @@ package tenant
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 	"github.com/apache/incubator-trafficcontrol/lib/go-tc"
 	"github.com/apache/incubator-trafficcontrol/traffic_ops/traffic_ops_golang/auth"
@@ -92,6 +93,8 @@ func GetUserTenantList(user auth.CurrentUser, db *sqlx.DB) ([]Tenant, error) {
 	UNION SELECT t.id, t.name, t.active, t.parent_id  FROM tenant t JOIN q ON q.id = t.parent_id)
 	SELECT id, name, active, parent_id FROM q;`
 
+	log.Debugln("\nQuery: ", query)
+
 	var tenantID int
 	var name string
 	var active bool
@@ -128,6 +131,7 @@ func IsResourceAuthorizedToUser(resourceTenantID int, user auth.CurrentUser, db 
 	var active bool
 	var useTenancy bool
 
+	log.Debugln("\nQuery: ", query)
 	err := db.QueryRow(query, user.TenantID, resourceTenantID).Scan(&tenantID, &active, &useTenancy)
 
 	switch {
@@ -141,6 +145,7 @@ func IsResourceAuthorizedToUser(resourceTenantID int, user auth.CurrentUser, db 
 		if active && tenantID == resourceTenantID {
 			return true, nil
 		} else {
+			fmt.Printf("default")
 			return false, nil
 		}
 	}
