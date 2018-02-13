@@ -1,4 +1,4 @@
-package tc
+package docs
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,33 +19,13 @@ package tc
  * under the License.
  */
 
-// A List of Divisions Response
-// swagger:response DivisionsResponse
-type DivisionsResponse struct {
+import tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+
+// Alerts - informs the client of server side messages
+// swagger:response Alerts
+type Alerts struct {
+	// Alerts Response Body
+	//
 	// in: body
-	Response []Division `json:"response"`
-}
-
-// A Single Division Response for Update and Create to depict what changed
-// swagger:response DivisionResponse
-// in: body
-type DivisionResponse struct {
-	// in: body
-	Response Division `json:"response"`
-}
-
-type Division struct {
-
-	// Division ID
-	//
-	ID int `json:"id" db:"id"`
-
-	// LastUpdated
-	//
-	LastUpdated string `json:"lastUpdated" db:"last_updated"`
-
-	// Division Name
-	//
-	// required: true
-	Name string `json:"name" db:"name"`
+	Alerts []tc.Alert `json:"alerts"`
 }

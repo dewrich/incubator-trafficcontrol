@@ -28,13 +28,22 @@ import (
 	"github.com/apache/incubator-trafficcontrol/lib/go-log"
 )
 
-type Alert struct {
-	Text  string `json:"text"`
-	Level string `json:"level"`
+// A List of Alerts
+// swagger:response Alerts
+type Alerts struct {
+	// in: body
+	Alerts []Alert `json:"alerts"`
 }
 
-type Alerts struct {
-	Alerts []Alert `json:"alerts"`
+// Alerts that inform the client of server side information
+type Alert struct {
+
+	// Severity
+	// enum: ["success", "info", "warn", "error"]
+	Level string `json:"level"`
+
+	// Message
+	Text string `json:"text"`
 }
 
 func CreateErrorAlerts(errs ...error) Alerts {
@@ -68,7 +77,7 @@ func GetHandleErrorsFunc(w http.ResponseWriter, r *http.Request) func(status int
 		w.Header().Set(ContentType, ApplicationJson)
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx,StatusKey,status)
+		ctx = context.WithValue(ctx, StatusKey, status)
 		*r = *r.WithContext(ctx)
 
 		fmt.Fprintf(w, "%s", errBytes)
@@ -76,17 +85,17 @@ func GetHandleErrorsFunc(w http.ResponseWriter, r *http.Request) func(status int
 }
 
 func HandleErrorsWithType(errs []error, errType ApiErrorType, handleErrs func(status int, errs ...error)) {
-		switch errType {
-		case SystemError:
-			handleErrs(http.StatusInternalServerError, errs...)
-		case DataConflictError:
-			handleErrs(http.StatusBadRequest, errs...)
-		case DataMissingError:
-			handleErrs(http.StatusNotFound, errs...)
-		default:
-			log.Errorf("received unknown ApiErrorType from read: %s\n", errType.String())
-			handleErrs(http.StatusInternalServerError, errs...)
-		}
+	switch errType {
+	case SystemError:
+		handleErrs(http.StatusInternalServerError, errs...)
+	case DataConflictError:
+		handleErrs(http.StatusBadRequest, errs...)
+	case DataMissingError:
+		handleErrs(http.StatusNotFound, errs...)
+	default:
+		log.Errorf("received unknown ApiErrorType from read: %s\n", errType.String())
+		handleErrs(http.StatusInternalServerError, errs...)
+	}
 }
 
 var StatusKey = "status"

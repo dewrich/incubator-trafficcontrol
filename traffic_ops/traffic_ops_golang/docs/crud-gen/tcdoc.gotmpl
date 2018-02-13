@@ -1,0 +1,139 @@
+package docs
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import tc "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+
+// {{.EntityPlural}} -  {{.EntityPlural}}Response to get the "response" top level key
+// swagger:response {{.EntityPlural}}
+// in: body
+type {{.EntityPlural}} struct {
+	// {{.Entity}} Response Body
+	// in: body
+	{{.EntityPlural}}Response tc.{{.EntityPlural}}Response `json:"response"`
+}
+
+// {{.Entity}} -  {{.Entity}}Response to get the "response" top level key
+// swagger:response {{.Entity}}
+// in: body
+type {{.Entity}} struct {
+	// {{.Entity}} Response Body
+	// in: body
+	{{.Entity}}Response tc.{{.Entity}}Response
+}
+
+// {{.Entity}}QueryParams
+//
+// swagger:parameters Get{{.EntityPlural}}
+type {{.Entity}}QueryParams struct {
+
+        // {{.EntityPlural}}QueryParams
+	{{ range .QueryParamFields }}
+        // {{.FieldDoc}}
+        //
+        {{.FieldName}} {{.FieldType}} `json:"{{.APIField}}"`
+	{{ end }}
+}
+
+// swagger:parameters Post{{.Entity}}
+type {{.Entity}}PostParam struct {
+	// {{.Entity}} Request Body
+	//
+	// in: body
+	// required: true
+	{{.Entity}} tc.{{.Entity}}
+}
+
+// swagger:parameters Get{{.Entity}}ById Delete{{.Entity}}
+type {{.Entity}}PathParams struct {
+
+	// Id associated to the {{.Entity}}
+	// in: path
+	ID int `json:"id"`
+}
+
+
+// Post{{.Entity}} swagger:route POST {{ .Route }} {{.Entity}} Post{{.Entity}}
+//
+// Create a {{.Entity}}
+//
+// Responses:
+//          200: Alerts
+func Post{{.Entity}}(entity {{.Entity}}PostParam) ({{.Entity}}, Alerts) {
+	return {{.Entity}}{}, Alerts{}
+}
+
+// Get{{.EntityPlural}} swagger:route GET {{ .Route }} {{.Entity}} Get{{.EntityPlural}}
+//
+// Retrieve a list of {{.EntityPlural}}
+//
+// Responses:
+//          200: {{.EntityPlural}}
+//          400: Alerts
+func Get{{.EntityPlural}}() ({{.EntityPlural}}, Alerts) {
+	return {{.EntityPlural}}{}, Alerts{}
+}
+
+// swagger:parameters Put{{.Entity}}
+type {{.Entity}}PutParam struct {
+
+	{{ range .PutParamFields }}
+    // {{.FieldName}}
+    // in: path
+    {{.FieldName}} {{.FieldType}} `json:"{{.APIField}}"`
+	{{ end }}
+
+	// {{.Entity}} Request Body
+	//
+	// in: body
+	// required: true
+	{{.Entity}} tc.{{.Entity}}
+}
+
+// Put{{.Entity}} swagger:route PUT {{.Route}}/{id} {{.Entity}} Put{{.Entity}}
+//
+// Update a {{.Entity}}
+//
+// Responses:
+//          200: {{.Entity}}
+func Put{{.Entity}}(entity {{.Entity}}PutParam) ({{.Entity}}, Alerts) {
+	return {{.Entity}}{}, Alerts{}
+}
+
+// Get{{.Entity}}ById swagger:route GET {{.Route}}/{id} {{.Entity}} Get{{.Entity}}ById
+//
+// Retrieve a specific {{.Entity}}
+//
+// Responses:
+//          200: {{.EntityPlural}}
+//          400: Alerts
+func Get{{.Entity}}ById() ({{.EntityPlural}}, Alerts) {
+	return {{.EntityPlural}}{}, Alerts{}
+}
+
+// Delete{{.Entity}} swagger:route DELETE {{.Route}}/{id} {{.Entity}} Delete{{.Entity}}
+//
+// Delete a {{.Entity}}
+//
+// Responses:
+//          200: Alerts
+func Delete{{.Entity}}(entityId int) Alerts {
+	return Alerts{}
+}

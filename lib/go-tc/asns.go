@@ -19,14 +19,45 @@ package tc
  * under the License.
  */
 
+// Autonomous System Numbers
+//
+// A List of ASNs Response
+// swagger:response ASNsResponse
+// in: body
 type ASNsResponse struct {
+	// in: body
 	Response []ASN `json:"response"`
 }
 
+// A Single ASN Response for Update and Create to depict what changed
+// swagger:response ASNResponse
+// in: body
+type ASNResponse struct {
+	// in: body
+	Response ASN `json:"response"`
+}
+
 type ASN struct {
-	ASN          int    `json:"asn" db:"asn"`
-	Cachegroup   string `json:"cachegroup" db:"cachegroup"`
-	CachegroupID int    `json:"cachegroupId" db:"cachegroup_id"`
-	ID           int    `json:"id" db:"id"`
-	LastUpdated  Time   `json:"lastUpdated" db:"last_updated"`
+	// The ASN to retrieve
+	//
+	// Autonomous System Numbers per APNIC for identifying a service provider
+	// required: true
+	ASN int `json:"asn" db:"asn"`
+
+	// Related cachegroup name
+	//
+	Cachegroup string `json:"cachegroup" db:"cachegroup"`
+
+	// Related cachegroup id
+	//
+	CachegroupID int `json:"cachegroupId" db:"cachegroup_id"`
+
+	// ID of the ASN
+	//
+	// required: true
+	ID int `json:"id" db:"id"`
+
+	// LastUpdated
+	//
+	LastUpdated string `json:"lastUpdated" db:"last_updated"`
 }

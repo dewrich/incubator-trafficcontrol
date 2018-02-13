@@ -1,0 +1,1277 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "The following REST APIs are used by the Traffic Portal UI along with several Traffic Control backend component and services.\n\nThis documentation is fully compliant with the Swagger 2.0 specification",
+    "title": "TrafficOps API",
+    "contact": {
+      "name": "Traffic Control Dev List",
+      "url": "http://traffic-control-cdn.readthedocs.io/en/latest/index.html",
+      "email": "dev@trafficcontrol.incubator.apache.org"
+    },
+    "license": {
+      "name": "Apache 2",
+      "url": "https://github.com/apache/incubator-trafficcontrol/blob/master/LICENSE"
+    },
+    "version": "1.3"
+  },
+  "host": "localhost:8443",
+  "basePath": "/api/1.3",
+  "paths": {
+    "/asns": {
+      "get": {
+        "description": "Retrieve a list of ASNs",
+        "tags": [
+          "ASN"
+        ],
+        "operationId": "GetASNs",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Cachegroup",
+            "description": "Related cachegroup name",
+            "name": "cachegroup",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "CachegroupID",
+            "description": "Related cachegroup id",
+            "name": "cachegroupId",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "Unique identifier for the CDN",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Orderby",
+            "name": "orderby",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ASNs"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a ASN",
+        "tags": [
+          "ASN"
+        ],
+        "operationId": "PostASN",
+        "parameters": [
+          {
+            "description": "ASN Request Body",
+            "name": "ASN",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ASN"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/asns/{id}": {
+      "get": {
+        "description": "Retrieve a specific ASN",
+        "tags": [
+          "ASN"
+        ],
+        "operationId": "GetASNById",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the ASN",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ASNs"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a ASN",
+        "tags": [
+          "ASN"
+        ],
+        "operationId": "PutASN",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "ASN Request Body",
+            "name": "ASN",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ASN"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ASN"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a ASN",
+        "tags": [
+          "ASN"
+        ],
+        "operationId": "DeleteASN",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the ASN",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/cdns": {
+      "get": {
+        "description": "Retrieve a list of CDNs",
+        "tags": [
+          "CDN"
+        ],
+        "operationId": "GetCDNs",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "DNSSecEnabled",
+            "description": "Enables Domain Name System Security Extensions (DNSSEC) for the CDN",
+            "name": "dnssecEnabled",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "DomainName",
+            "description": "The domain name for the CDN",
+            "name": "domainName",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "Unique identifier for the CDN",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "description": "The CDN name for the CDN",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Orderby",
+            "name": "orderby",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/CDNs"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a CDN",
+        "tags": [
+          "CDN"
+        ],
+        "operationId": "PostCDN",
+        "parameters": [
+          {
+            "description": "CDN Request Body",
+            "name": "CDN",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CDN"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/cdns/{id}": {
+      "get": {
+        "description": "Retrieve a specific CDN",
+        "tags": [
+          "CDN"
+        ],
+        "operationId": "GetCDNById",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the CDN",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/CDNs"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a CDN",
+        "tags": [
+          "CDN"
+        ],
+        "operationId": "PutCDN",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "CDN Request Body",
+            "name": "CDN",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CDN"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/CDN"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a CDN",
+        "tags": [
+          "CDN"
+        ],
+        "operationId": "DeleteCDN",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the CDN",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/divisions": {
+      "get": {
+        "description": "Retrieve a list of Divisions",
+        "tags": [
+          "Division"
+        ],
+        "operationId": "GetDivisions",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "description": "Name for this Division",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "Unique identifier for the Division",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Orderby",
+            "name": "orderby",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Divisions"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a Division",
+        "tags": [
+          "Division"
+        ],
+        "operationId": "PostDivision",
+        "parameters": [
+          {
+            "description": "Division Request Body",
+            "name": "Division",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Division"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/divisions/{id}": {
+      "get": {
+        "description": "Retrieve a specific Division",
+        "tags": [
+          "Division"
+        ],
+        "operationId": "GetDivisionById",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the Division",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Divisions"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a Division",
+        "tags": [
+          "Division"
+        ],
+        "operationId": "PutDivision",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Division Request Body",
+            "name": "Division",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Division"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Division"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a Division",
+        "tags": [
+          "Division"
+        ],
+        "operationId": "DeleteDivision",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the Division",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/regions": {
+      "get": {
+        "description": "Retrieve a list of Regions",
+        "tags": [
+          "Region"
+        ],
+        "operationId": "GetRegions",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Division",
+            "description": "Division ID that refers to this Region",
+            "name": "division",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "DivisionName",
+            "description": "Division Name that refers to this Region",
+            "name": "divisionName",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "Unique identifier for the Region",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Orderby",
+            "name": "orderby",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Regions"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a Region",
+        "tags": [
+          "Region"
+        ],
+        "operationId": "PostRegion",
+        "parameters": [
+          {
+            "description": "Region Request Body",
+            "name": "Region",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Region"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/regions/{id}": {
+      "get": {
+        "description": "Retrieve a specific Region",
+        "tags": [
+          "Region"
+        ],
+        "operationId": "GetRegionById",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the Region",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Regions"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a Region",
+        "tags": [
+          "Region"
+        ],
+        "operationId": "PutRegion",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Region Request Body",
+            "name": "Region",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Region"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Region"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a Region",
+        "tags": [
+          "Region"
+        ],
+        "operationId": "DeleteRegion",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the Region",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/statuses": {
+      "get": {
+        "description": "Retrieve a list of Statuses",
+        "tags": [
+          "Status"
+        ],
+        "operationId": "GetStatuses",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "description": "The name that refers to this Status",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Description",
+            "description": "A short description of the status",
+            "name": "description",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "Unique identifier for the Status",
+            "name": "id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Orderby",
+            "name": "orderby",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Statuses"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a Status",
+        "tags": [
+          "Status"
+        ],
+        "operationId": "PostStatus",
+        "parameters": [
+          {
+            "description": "Status Request Body",
+            "name": "Status",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Statuses"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    },
+    "/statuses/{id}": {
+      "get": {
+        "description": "Retrieve a specific Status",
+        "tags": [
+          "Status"
+        ],
+        "operationId": "GetStatusById",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the Status",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Statuses"
+          },
+          "400": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a Status",
+        "tags": [
+          "Status"
+        ],
+        "operationId": "PutStatus",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Status Request Body",
+            "name": "Status",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Statuses"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Status"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a Status",
+        "tags": [
+          "Status"
+        ],
+        "operationId": "DeleteStatus",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "Id associated to the Status",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Alerts"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ASN": {
+      "type": "object",
+      "required": [
+        "asn",
+        "id"
+      ],
+      "properties": {
+        "asn": {
+          "description": "The ASN to retrieve\n\nAutonomous System Numbers per APNIC for identifying a service provider",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ASN"
+        },
+        "cachegroup": {
+          "description": "Related cachegroup name",
+          "type": "string",
+          "x-go-name": "Cachegroup"
+        },
+        "cachegroupId": {
+          "description": "Related cachegroup id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CachegroupID"
+        },
+        "id": {
+          "description": "ID of the ASN",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "lastUpdated": {
+          "description": "LastUpdated",
+          "type": "string",
+          "x-go-name": "LastUpdated"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "ASNResponse": {
+      "description": "A Single ASN Response for Update and Create to depict what changed",
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/ASN"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "ASNsResponse": {
+      "description": "A List of ASNs Response",
+      "type": "object",
+      "title": "Autonomous System Numbers",
+      "properties": {
+        "response": {
+          "description": "in: body",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ASN"
+          },
+          "x-go-name": "Response"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "Alert": {
+      "description": "Alerts that inform the client of server side information",
+      "type": "object",
+      "properties": {
+        "level": {
+          "description": "Severity",
+          "type": "string",
+          "enum": [
+            "[\"success\"",
+            " \"info\"",
+            " \"warn\"",
+            " \"error\"]"
+          ],
+          "x-go-name": "Level"
+        },
+        "text": {
+          "description": "Message",
+          "type": "string",
+          "x-go-name": "Text"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "CDN": {
+      "type": "object",
+      "required": [
+        "dnssecEnabled",
+        "domainName",
+        "id",
+        "name"
+      ],
+      "properties": {
+        "dnssecEnabled": {
+          "description": "The CDN to retrieve\n\nenables Domain Name Security Extensions on the specified CDN",
+          "type": "boolean",
+          "x-go-name": "DNSSECEnabled"
+        },
+        "domainName": {
+          "description": "DomainName of the CDN",
+          "type": "string",
+          "x-go-name": "DomainName"
+        },
+        "id": {
+          "description": "ID of the CDN",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "lastUpdated": {
+          "description": "LastUpdated",
+          "type": "string",
+          "x-go-name": "LastUpdated"
+        },
+        "name": {
+          "description": "Name of the CDN",
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "CDNResponse": {
+      "description": "A Single CDN Response for Update and Create to depict what changed",
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/CDN"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "CDNsResponse": {
+      "description": "A List of CDNs Response",
+      "type": "object",
+      "properties": {
+        "response": {
+          "description": "in: body",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CDN"
+          },
+          "x-go-name": "Response"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "Division": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "Division ID",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "lastUpdated": {
+          "description": "LastUpdated",
+          "type": "string",
+          "x-go-name": "LastUpdated"
+        },
+        "name": {
+          "description": "Division Name",
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "DivisionResponse": {
+      "description": "A Single Division Response for Update and Create to depict what changed",
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/Division"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "DivisionsResponse": {
+      "description": "A List of Divisions Response",
+      "type": "object",
+      "properties": {
+        "response": {
+          "description": "in: body",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Division"
+          },
+          "x-go-name": "Response"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "Region": {
+      "type": "object",
+      "required": [
+        "divisionName",
+        "division",
+        "name"
+      ],
+      "properties": {
+        "division": {
+          "description": "DivisionName of the Division",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Division"
+        },
+        "divisionName": {
+          "description": "DivisionName - Name of the Division associated to this Region",
+          "type": "string",
+          "x-go-name": "DivisionName"
+        },
+        "id": {
+          "description": "Region ID",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "x-go-name": "LastUpdated"
+        },
+        "name": {
+          "description": "Region Name",
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "RegionResponse": {
+      "description": "A Single Region Response for Update and Create to depict what changed",
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/Region"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "RegionsResponse": {
+      "description": "A List of Regions Response",
+      "type": "object",
+      "properties": {
+        "response": {
+          "description": "in: body",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Region"
+          },
+          "x-go-name": "Response"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "StatusResponse": {
+      "description": "A Single Status Response for Update and Create to depict what changed",
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/Statuses"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "Statuses": {
+      "description": "A Single Statuses Response for Update and Create to depict what changed",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "description": {
+          "description": "The Statuses to retrieve\n\ndescription of the status type",
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "id": {
+          "description": "ID of the Status",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "lastUpdated": {
+          "description": "The Time / Date this server entry was last updated",
+          "type": "string",
+          "x-go-name": "LastUpdated"
+        },
+        "name": {
+          "type": "string",
+          "enum": [
+            "[\"OFFLINE\"",
+            " \"ONLINE\"",
+            " \"ADMIN_DOWN\"",
+            " \"REPORTED\"",
+            " \"CCR_IGNORE\"",
+            " \"PRE_PROD\"]"
+          ],
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-name": "Status",
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    },
+    "StatusesResponse": {
+      "description": "A List of Statuses Response that depict the state of a server",
+      "type": "object",
+      "properties": {
+        "response": {
+          "description": "in: body",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Statuses"
+          },
+          "x-go-name": "Response"
+        }
+      },
+      "x-go-package": "github.com/apache/incubator-trafficcontrol/lib/go-tc"
+    }
+  },
+  "responses": {
+    "ASN": {
+      "description": "ASN -  ASNResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/ASNResponse"
+      }
+    },
+    "ASNResponse": {
+      "description": "A Single ASN Response for Update and Create to depict what changed",
+      "schema": {
+        "$ref": "#/definitions/ASN"
+      }
+    },
+    "ASNs": {
+      "description": "ASNs -  ASNsResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/ASNsResponse"
+      }
+    },
+    "ASNsResponse": {
+      "description": "Autonomous System Numbers\n\nA List of ASNs Response",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ASN"
+        }
+      }
+    },
+    "Alerts": {
+      "description": "Alerts - informs the client of server side messages",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Alert"
+        }
+      }
+    },
+    "CDN": {
+      "description": "CDN -  CDNResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/CDNResponse"
+      }
+    },
+    "CDNResponse": {
+      "description": "A Single CDN Response for Update and Create to depict what changed",
+      "schema": {
+        "$ref": "#/definitions/CDN"
+      }
+    },
+    "CDNs": {
+      "description": "CDNs -  CDNsResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/CDNsResponse"
+      }
+    },
+    "CDNsResponse": {
+      "description": "A List of CDNs Response",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/CDN"
+        }
+      }
+    },
+    "Division": {
+      "description": "Division -  DivisionResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/DivisionResponse"
+      }
+    },
+    "DivisionResponse": {
+      "description": "A Single Division Response for Update and Create to depict what changed",
+      "schema": {
+        "$ref": "#/definitions/Division"
+      }
+    },
+    "Divisions": {
+      "description": "Divisions -  DivisionsResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/DivisionsResponse"
+      }
+    },
+    "DivisionsResponse": {
+      "description": "A List of Divisions Response",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Division"
+        }
+      }
+    },
+    "Region": {
+      "description": "Region -  RegionResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/RegionResponse"
+      }
+    },
+    "RegionResponse": {
+      "description": "A Single Region Response for Update and Create to depict what changed",
+      "schema": {
+        "$ref": "#/definitions/Region"
+      }
+    },
+    "Regions": {
+      "description": "Regions -  RegionsResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/RegionsResponse"
+      }
+    },
+    "RegionsResponse": {
+      "description": "A List of Regions Response",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Region"
+        }
+      }
+    },
+    "Status": {
+      "description": "Status -  StatusResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/StatusResponse"
+      }
+    },
+    "StatusResponse": {
+      "description": "A Single Status Response for Update and Create to depict what changed",
+      "schema": {
+        "$ref": "#/definitions/Statuses"
+      }
+    },
+    "Statuses": {
+      "description": "Statuses -  StatusesResponse to get the \"response\" top level key",
+      "schema": {
+        "$ref": "#/definitions/StatusesResponse"
+      }
+    },
+    "StatusesResponse": {
+      "description": "A List of Statuses Response that depict the state of a server",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Statuses"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Cookie": {
+      "type": "apiKey",
+      "name": "cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "Cookie": []
+    }
+  ]
+}

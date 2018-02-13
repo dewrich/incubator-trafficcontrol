@@ -19,14 +19,44 @@ package tc
  * under the License.
  */
 
+// A List of Regions Response
+// swagger:response RegionsResponse
+// in: body
 type RegionsResponse struct {
+	// in: body
 	Response []Region `json:"response"`
 }
 
+// A Single Region Response for Update and Create to depict what changed
+// swagger:response RegionResponse
+// in: body
+type RegionResponse struct {
+	// in: body
+	Response Region `json:"response"`
+}
+
 type Region struct {
-	DivisionName string `json:"divisionName" db:"divisionname"`
-	Division     int    `json:"division" db:"division"`
-	ID           int    `json:"id" db:"id"`
-	LastUpdated  Time   `json:"lastUpdated" db:"last_updated"`
-	Name         string `json:"name" db:"name"`
+
+	// The Region to retrieve
+
+	// DivisionName - Name of the Division associated to this Region
+	//
+	// required: true
+	DivisionName string `json:"divisionName"`
+
+	// DivisionName of the Division
+	//
+	// required: true
+	Division int `json:"division" db:"division"`
+
+	// Region ID
+	//
+	ID int `json:"id" db:"id"`
+
+	LastUpdated string `json:"lastUpdated" db:"last_updated"`
+
+	// Region Name
+	//
+	// required: true
+	Name string `json:"name" db:"name"`
 }

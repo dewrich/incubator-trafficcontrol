@@ -34,10 +34,10 @@ import (
 )
 
 //we need a type alias to define functions on
-type TOCDN tc.CDN
+type TOCDN tc.CDNNullable
 
 //the refType is passed into the handlers where a copy of its type is used to decode the json.
-var refType = TOCDN(tc.CDN{})
+var refType = TOCDN(tc.CDNNullable{})
 
 func GetRefType() *TOCDN {
 	return &refType
@@ -170,7 +170,7 @@ func (cdn *TOCDN) Update(db *sqlx.DB, user auth.CurrentUser) (error, tc.ApiError
 		}
 	}
 	log.Debugf("lastUpdated: %++v", lastUpdated)
-	cdn.LastUpdated = lastUpdated
+	//cdn.LastUpdated = lastUpdated
 	if rowsAffected != 1 {
 		if rowsAffected < 1 {
 			return errors.New("no cdn found with this id"), tc.DataMissingError

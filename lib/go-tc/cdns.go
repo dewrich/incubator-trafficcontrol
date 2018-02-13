@@ -19,16 +19,78 @@ package tc
  * under the License.
  */
 
+// A List of CDNs Response
+// swagger:response CDNsResponse
+// in: body
 type CDNsResponse struct {
+	// in: body
 	Response []CDN `json:"response"`
 }
 
+// A Single CDN Response for Update and Create to depict what changed
+// swagger:response CDNResponse
+// in: body
+type CDNResponse struct {
+	// in: body
+	Response CDN `json:"response"`
+}
+
 type CDN struct {
-	DNSSECEnabled bool   `json:"dnssecEnabled" db:"dnssec_enabled"`
-	DomainName    string `json:"domainName" db:"domain_name"`
-	ID            int    `json:"id" db:"id"`
-	LastUpdated   Time   `json:"lastUpdated" db:"last_updated"`
-	Name          string `json:"name" db:"name"`
+
+	// The CDN to retrieve
+	//
+	// enables Domain Name Security Extensions on the specified CDN
+	//
+	// required: true
+	DNSSECEnabled bool `json:"dnssecEnabled" db:"dnssec_enabled"`
+
+	// DomainName of the CDN
+	//
+	// required: true
+	DomainName string `json:"domainName" db:"domain_name"`
+
+	// ID of the CDN
+	//
+	// required: true
+	ID int `json:"id" db:"id"`
+
+	// LastUpdated
+	//
+	LastUpdated string `json:"lastUpdated" db:"last_updated"`
+
+	// Name of the CDN
+	//
+	// required: true
+	Name string `json:"name" db:"name"`
+}
+
+type CDNNullable struct {
+
+	// The CDN to retrieve
+	//
+	// enables Domain Name Security Extensions on the specified CDN
+	//
+	// required: true
+	DNSSECEnabled bool `json:"dnssecEnabled" db:"dnssec_enabled"`
+
+	// DomainName of the CDN
+	//
+	// required: true
+	DomainName string `json:"domainName" db:"domain_name"`
+
+	// ID of the CDN
+	//
+	// required: true
+	ID int `json:"id" db:"id"`
+
+	// LastUpdated
+	//
+	LastUpdated Time `json:"lastUpdated" db:"last_updated"`
+
+	// Name of the CDN
+	//
+	// required: true
+	Name string `json:"name" db:"name"`
 }
 
 // CDNSSLKeysResponse ...
