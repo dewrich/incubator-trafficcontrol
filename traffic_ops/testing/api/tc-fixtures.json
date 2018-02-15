@@ -1,12 +1,14 @@
 {
     "asns": [
         {
-            "cachegroupName": "cachegroup1",
-            "name": "asn1"
+            "asn": 1111,
+            "cachegroup": "cachegroup1",
+            "cachegroupId": 1
         },
         {
-            "cachegroupName": "cachegroup2",
-            "name": "asn2"
+            "asn": 2222,
+            "cachegroup": "cachegroup2",
+            "cachegroupId": 2
         }
     ],
     "cachegroups": [
