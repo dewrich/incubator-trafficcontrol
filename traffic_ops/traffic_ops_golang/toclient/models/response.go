@@ -16,7 +16,7 @@ import (
 
 // Response in: body
 // swagger:model Response
-type Response []*ASN
+type Response []*Region
 
 // Validate validates this response
 func (m Response) Validate(formats strfmt.Registry) error {
