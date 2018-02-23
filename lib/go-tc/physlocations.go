@@ -33,8 +33,8 @@ type PhysLocation struct {
 	Name        string `json:"name" db:"name"`
 	Phone       string `json:"phone" db:"phone"`
 	POC         string `json:"poc" db:"poc"`
-	RegionID    int    `json:"regionId" db:"region"`
-	RegionName  string `json:"regionName"`
+	RegionID    int    `json:"regionId" db:"region_id"`
+	RegionName  string `json:"region" db:"region_name"`
 	ShortName   string `json:"shortName" db:"short_name"`
 	State       string `json:"state" db:"state"`
 	Zip         string `json:"zip" db:"zip"`
