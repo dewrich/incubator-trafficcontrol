@@ -42,6 +42,8 @@ type Config struct {
 	// NOTE: don't care about any other fields for now..
 	RiakAuthOptions *riak.AuthOptions
 	RiakEnabled     bool
+	ConfigLDAP      *ConfigLDAP
+	LDAPEnabled     bool
 }
 
 // ConfigHypnotoad carries http setting for hypnotoad (mojolicious) server
@@ -83,6 +85,13 @@ type ConfigDatabase struct {
 	SSL         bool   `json:"ssl"`
 }
 
+type ConfigLDAP struct {
+	AdminPass  string `json:"admin_pass"`
+	SearchBase string `json:"search_base"`
+	AdminDN    string `json:"admin_dn"`
+	Host       string `json:"host"`
+}
+
 // ErrorLog - critical messages
 func (c Config) ErrorLog() log.LogLocation {
 	return log.LogLocation(c.LogLocationError)
@@ -107,7 +116,7 @@ func (c Config) EventLog() log.LogLocation {
 }
 
 // LoadConfig - reads the config file into the Config struct
-func LoadConfig(cdnConfPath string, dbConfPath string, riakConfPath string) (Config, error) {
+func LoadConfig(cdnConfPath string, dbConfPath string, riakConfPath string, ldapConfPath string) (Config, error) {
 	// load json from cdn.conf
 	confBytes, err := ioutil.ReadFile(cdnConfPath)
 	if err != nil {
@@ -139,6 +148,16 @@ func LoadConfig(cdnConfPath string, dbConfPath string, riakConfPath string) (Con
 		if err != nil {
 			return Config{}, fmt.Errorf("parsing config '%s': %v", riakConfPath, err)
 		}
+	}
+
+	if ldapConfPath != "" {
+		cfg.LDAPEnabled, cfg.ConfigLDAP, err = GetLDAPConfig(ldapConfPath)
+		if err != nil {
+			cfg.LDAPEnabled = false // probably unnecessary
+			return cfg, fmt.Errorf("parsing ldap config '%s': %v", ldapConfPath, err)
+		}
+	} else {
+		cfg.LDAPEnabled = false
 	}
 
 	return cfg, err
@@ -224,4 +243,23 @@ func ParseConfig(cfg Config) (Config, error) {
 	}
 
 	return cfg, nil
+}
+
+func GetLDAPConfig(LDAPConfPath string) (bool, *ConfigLDAP, error) {
+	LDAPConfBytes, err := ioutil.ReadFile(LDAPConfPath)
+	if err != nil {
+
+		return false, nil, fmt.Errorf("reading LDAP conf '%v': %v", LDAPConfPath, err)
+	}
+	LDAPconf, err := getLDAPConf(string(LDAPConfBytes))
+	if err != nil {
+		return false, LDAPconf, fmt.Errorf("parsing LDAP conf '%v': %v", LDAPConfBytes, err)
+	}
+	return true, LDAPconf, nil
+}
+
+func getLDAPConf(s string) (*ConfigLDAP, error) {
+	ldapConf := ConfigLDAP{}
+	err := json.Unmarshal([]byte(s), &ldapConf)
+	return &ldapConf, err
 }
