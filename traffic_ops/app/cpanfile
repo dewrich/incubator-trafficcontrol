@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 
-requires 'perl', '5.16.3';
 requires 'Algorithm::C3';
 requires 'B::Hooks::EndOfScope';
 requires 'CPAN::Meta';

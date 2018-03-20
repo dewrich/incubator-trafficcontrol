@@ -1,0 +1,14 @@
+*.md
+Dockerfile
+app/local
+app/t
+app/t_integration
+build
+client*
+doc
+etc
+experimental
+go
+install
+testing
+traffic_ops_golang
