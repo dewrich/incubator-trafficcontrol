@@ -9,6 +9,5 @@ doc
 etc
 experimental
 go
-install
 testing
 traffic_ops_golang
