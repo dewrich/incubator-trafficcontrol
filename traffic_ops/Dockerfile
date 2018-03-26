@@ -20,15 +20,12 @@
 # Based on CentOS 7.2
 ############################################################
 
-FROM centos:7
+# Base stage installs rpms needed for both building and runtime
+FROM centos:7 as base
 MAINTAINER Dan Kirkwood
 
 RUN yum install -y https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
-RUN yum makecache fast
 RUN yum -y install \
-    cpanminus\
-    expat-devel\
-    gcc-c++\
     libcap\
     libcurl\
     libcurl-devel\
@@ -50,9 +47,21 @@ RUN yum -y install \
     postgresql96\
     postgresql96-devel
 
+# Build stage gets traffic ops source in place and installs perl modules using carton
+FROM base as build
+ 
+RUN yum -y install \
+    cpanminus\
+    expat-devel\
+    gcc-c++
+
 RUN cpanm Carton
 ADD app /opt/traffic_ops/app
 WORKDIR /opt/traffic_ops/app
 RUN POSTGRES_HOME=/usr/pgsql-9.6 /usr/local/bin/carton || cat /root/.cpanm/work/*/build.log
 
 
+# Trafficops Perl stage runs hypnotoad
+FROM base as traffic_ops_perl
+
+COPY --from=build /opt/traffic_ops /opt/traffic_ops
