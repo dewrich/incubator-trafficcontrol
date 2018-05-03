@@ -35,77 +35,80 @@ my $t      = Test::Mojo->new('TrafficOps');
 Test::TestHelper->unload_core_data($schema);
 Test::TestHelper->load_core_data($schema);
 
-ok $t->post_ok( '/login', => form => { u => Test::TestHelper::ADMIN_USER, p => Test::TestHelper::ADMIN_USER_PASSWORD } )->status_is(302)
+ok $t->post_ok( Test::TestHelper::TO_URL . '/login' => { Accept => 'application/json' } , => form => { u => Test::TestHelper::ADMIN_USER, p => Test::TestHelper::ADMIN_USER_PASSWORD } )->status_is(302)
 	->or( sub { diag $t->tx->res->content->asset->{content}; } ), 'Should login?';
 
-$t->get_ok("/api/1.2/cdns")->status_is(200)->json_is( "/response/0/id", 100 )
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns' => { Accept => 'application/json' })->status_is(200)->json_is( "/response/0/id", 100 )
     ->json_is( "/response/0/name", "cdn1" )->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-$t->get_ok("/api/1.2/cdns/100")->status_is(200)->json_is( "/response/0/id", 100 )
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/100' => { Accept => 'application/json' })->status_is(200)->json_is( "/response/0/id", 100 )
     ->json_is( "/response/0/name", "cdn1" )->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->put_ok('/api/1.2/cdns/100/snapshot')
+ok $t->put_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/100/snapshot')
         ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } )
     , 'Is the cdn snapshotted?';
 
-$t->get_ok("/api/1.2/cdns/cdn1/snapshot")->status_is(200)
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/cdn1/snapshot' => { Accept => 'application/json' })->status_is(200)
     ->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-$t->get_ok("/api/1.2/cdns/cdn1/snapshot/new")->status_is(200)
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/cdn1/snapshot/new' => { Accept => 'application/json' })->status_is(200)
     ->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->post_ok('/api/1.2/cdns/100/queue_update' => {Accept => 'application/json'} => json => {
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/100/queue_update' => {Accept => 'application/json'} => json => {
             "action" => "queue" })
         ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } )
         ->json_is( "/response/cdnId" => 100 )
         ->json_is( "/response/action" => "queue" )
     , 'Does the cdn details return?';
 
-$t->get_ok("/api/1.2/servers?cdnId=100")->status_is(200)
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/servers?cdnId=100&orderby=hostName' => { Accept => 'application/json' })->status_is(200)
     ->json_is( "/response/0/updPending", 1 )
     ->json_is( "/response/1/updPending", 1 )
     ->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->post_ok('/api/1.2/cdns/100/queue_update' => {Accept => 'application/json'} => json => {
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/100/queue_update' => {Accept => 'application/json' } => json => {
             "action" => "dequeue" })
         ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } )
         ->json_is( "/response/cdnId" => 100 )
         ->json_is( "/response/action" => "dequeue" )
     , 'Does the cdn details return?';
 
-$t->get_ok("/api/1.2/servers?cdnId=100")->status_is(200)
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/servers?cdnId=100' => { Accept => 'application/json' } )->status_is(200)
     ->json_is( "/response/0/updPending", 0 )
     ->json_is( "/response/1/updPending", 0 )
     ->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->post_ok('/api/1.2/cdns' => {Accept => 'application/json'} => json => {
-        "name" => "cdn_test", "dnssecEnabled" => \1, "domainName" => "testcdn.kabletown.net" })
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns' => { Accept => 'application/json' } => json => {
+        "name" => "cdn-test", "dnssecEnabled" => \1, "domainName" => "testcdn.kabletown.net" })
     ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } )
-    ->json_is( "/response/name" => "cdn_test" )
+    ->json_is( "/response/name" => "cdn-test" )
     ->json_is( "/alerts/0/level" => "success" )
     ->json_is( "/alerts/0/text" => "cdn was created." )
             , 'Do the cdn queue update details return?';
 
-my $cdn_id = &get_cdn_id('cdn_test');
+my $cdn_id = &get_cdn_id('cdn1');
 
-ok $t->put_ok('/api/1.2/cdns/' . $cdn_id  => {Accept => 'application/json'} => json => {
-        "name" => "cdn_test2", "domainName" => "testcdn2.kabletown.net", "dnssecEnabled" => \1
+ok $t->put_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/' . $cdn_id  => {Accept => 'application/json'} => json => {
+        "id" => $cdn_id, "name" => "cdn-test2", "domainName" => "testcdn2.kabletown.net", "dnssecEnabled" => \1
         })
-    ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } )
-    ->json_is( "/response/name" => "cdn_test2" )
-    ->json_is( "/alerts/0/level" => "success" )
+    ->status_is(200)
+    ->json_is( "/response/name" => "cdn-test2" )
+    ->json_is( "/alerts/0/level" => "success" )->or( sub { diag $t->tx->res->content->asset->{content}; } )
             , 'Does the cdn details return?';
 
-ok $t->delete_ok('/api/1.2/cdns/' . $cdn_id)->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+$cdn_id = &get_cdn_id('cdn4');
+ok $t->delete_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns/name/cdn3')->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->delete_ok('/api/1.2/cdns/name/cdn3')->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
-
-ok $t->put_ok('/api/1.2/cdns/' . $cdn_id  => {Accept => 'application/json'} => json => {
-        "name" => "cdn_test3"
+$cdn_id = &get_cdn_id('cdn2');
+ok $t->put_ok( Test::TestHelper::TO_URL .  '/api/1.2/cdns/' . $cdn_id  => {Accept => 'application/json'} => json => {
+        "id" => $cdn_id,
+        "name" => "cdn-test3",
+        "domainName" => "domain.net",
+        "dnssecEnabled" => \1
         })
-    ->status_is(404)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+    ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->get_ok('/logout')->status_is(302)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+ok $t->get_ok( Test::TestHelper::TO_URL . '/logout')->status_is(302)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 $dbh->disconnect();
 done_testing();
 

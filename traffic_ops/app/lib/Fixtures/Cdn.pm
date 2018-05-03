@@ -43,6 +43,14 @@ my %definition_for = (
 			domain_name => 'cdn3.kabletown.net',
 		},
 	},
+	cdn4_cdn_name => {
+		new   => 'Cdn',
+		using => {
+			id          => 400,
+			name        => 'cdn4',
+			domain_name => 'cdn4.kabletown.net',
+		},
+	},
 );
 
 sub get_definition {
