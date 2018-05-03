@@ -35,34 +35,34 @@ my $t      = Test::Mojo->new('TrafficOps');
 Test::TestHelper->unload_core_data($schema);
 Test::TestHelper->load_core_data($schema);
 
-ok $t->post_ok( '/login', => form => { u => Test::TestHelper::ADMIN_USER, p => Test::TestHelper::ADMIN_USER_PASSWORD } )->status_is(302)
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/user/login' => { Accept => 'application/json' } => json =>  { u => Test::TestHelper::ADMIN_USER, p => Test::TestHelper::ADMIN_USER_PASSWORD } )->status_is(200)
 	->or( sub { diag $t->tx->res->content->asset->{content}; } ), 'Should login?';
 
-ok $t->post_ok('/api/1.2/divisions/mountain/regions' => {Accept => 'application/json'} => json => {
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/divisions/mountain/regions' => {Accept => 'application/json'} => json => {
         "name" => "region1"})->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } )
 	->json_is( "/response/name" => "region1" )
 	->json_is( "/response/divisionName" => "mountain" )
             , 'Does the region details return?';
 
-ok $t->post_ok('/api/1.2/divisions/mountain/regions' => {Accept => 'application/json'} => json => {
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/divisions/mountain/regions' => {Accept => 'application/json'} => json => {
         "name" => "region1"})->status_is(400);
 
-$t->get_ok("/api/1.2/regions")->status_is(200)->json_is( "/response/0/id", 200 )
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/regions' . "?orderby=name")->status_is(200)->json_is( "/response/0/id", 200 )
 	->json_is( "/response/0/name", "Boulder Region" )->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-$t->get_ok("/api/1.2/regions/100")->status_is(200)->json_is( "/response/0/id", 100 )
+$t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/regions/100')->status_is(200)->json_is( "/response/0/id", 100 )
 	->json_is( "/response/0/name", "Denver Region" )->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->post_ok('/api/1.2/regions' => {Accept => 'application/json'} => json => {
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/regions' => {Accept => 'application/json'} => json => {
 			"name" => "reg1",
 			"division" => "string"
 		})
 		->status_is(400)->or( sub { diag $t->tx->res->content->asset->{content}; } )
 		->json_is( "/alerts/0/level" => "error" )
-		->json_is( "/alerts/0/text" => "division must be a positive integer" )
+		->json_is( "/alerts/0/text" => "json: cannot unmarshal string into Go struct field TORegion.division of type int" )
 	, 'Did the region create fail?';
 
-ok $t->post_ok('/api/1.2/regions' => {Accept => 'application/json'} => json => {
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/regions' => {Accept => 'application/json'} => json => {
 			"name" => "reg1",
 			"division" => 100
 		})
@@ -70,12 +70,13 @@ ok $t->post_ok('/api/1.2/regions' => {Accept => 'application/json'} => json => {
 		->json_is( "/response/name" => "reg1" )
 		->json_is( "/response/division" => 100 )
 		->json_is( "/alerts/0/level" => "success" )
-		->json_is( "/alerts/0/text" => "Region create was successful." )
+		->json_is( "/alerts/0/text" => "region was created." )
 	, 'Do the region details return?';
 
 my $region_id = &get_reg_id('reg1');
 
-ok $t->put_ok('/api/1.2/regions/' . $region_id  => {Accept => 'application/json'} => json => {
+ok $t->put_ok( Test::TestHelper::TO_URL . '/api/1.2/regions/' . $region_id  => {Accept => 'application/json'} => json => {
+			"id" => $region_id,
 			"name" => "reg2",
 			"division" => 100
 		})
@@ -85,7 +86,7 @@ ok $t->put_ok('/api/1.2/regions/' . $region_id  => {Accept => 'application/json'
 		->json_is( "/alerts/0/level" => "success" )
 	, 'Do the regions details return?';
 
-ok $t->delete_ok('/api/1.2/regions/' . $region_id)->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+ok $t->delete_ok( Test::TestHelper::TO_URL . '/api/1.2/regions/' . $region_id . "?orderby=name")->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
 ok $t->get_ok('/logout')->status_is(302)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 done_testing();
