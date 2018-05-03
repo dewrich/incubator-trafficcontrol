@@ -35,7 +35,7 @@ my $t      = Test::Mojo->new('TrafficOps');
 Test::TestHelper->unload_core_data($schema);
 Test::TestHelper->load_core_data($schema);
 
-ok $t->post_ok( Test::TestHelper::TO_URL . '/login' => { Accept => 'application/json' } , => form => { u => Test::TestHelper::ADMIN_USER, p => Test::TestHelper::ADMIN_USER_PASSWORD } )->status_is(302)
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/user/login' => { Accept => 'application/json' } => json =>  { u => Test::TestHelper::ADMIN_USER, p => Test::TestHelper::ADMIN_USER_PASSWORD } )->status_is(200)
 	->or( sub { diag $t->tx->res->content->asset->{content}; } ), 'Should login?';
 
 $t->get_ok( Test::TestHelper::TO_URL . '/api/1.2/cdns' => { Accept => 'application/json' })->status_is(200)->json_is( "/response/0/id", 100 )
