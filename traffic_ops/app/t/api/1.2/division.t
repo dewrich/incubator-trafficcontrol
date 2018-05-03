@@ -64,7 +64,8 @@ ok $t->put_ok( Test::TestHelper::TO_URL . '/api/1.2/divisions/' . $division_id  
 
 ok $t->delete_ok( Test::TestHelper::TO_URL . '/api/1.2/divisions/' . $division_id)->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->get_ok('/logout')->status_is(302)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/user/logout')->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+
 $dbh->disconnect();
 done_testing();
 

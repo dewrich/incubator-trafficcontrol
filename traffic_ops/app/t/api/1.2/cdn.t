@@ -108,7 +108,8 @@ ok $t->put_ok( Test::TestHelper::TO_URL .  '/api/1.2/cdns/' . $cdn_id  => {Accep
         })
     ->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->get_ok( Test::TestHelper::TO_URL . '/logout')->status_is(302)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/user/logout')->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+
 $dbh->disconnect();
 done_testing();
 

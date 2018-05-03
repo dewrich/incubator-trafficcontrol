@@ -88,7 +88,8 @@ ok $t->put_ok( Test::TestHelper::TO_URL . '/api/1.2/regions/' . $region_id  => {
 
 ok $t->delete_ok( Test::TestHelper::TO_URL . '/api/1.2/regions/' . $region_id . "?orderby=name")->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
 
-ok $t->get_ok('/logout')->status_is(302)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+ok $t->post_ok( Test::TestHelper::TO_URL . '/api/1.2/user/logout')->status_is(200)->or( sub { diag $t->tx->res->content->asset->{content}; } );
+
 done_testing();
 
 sub get_reg_id {
