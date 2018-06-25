@@ -54,6 +54,8 @@ func Handler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		stats := db.Stats()
+		fmt.Printf("Open Connections ---> %v\n", stats)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "%s", respBts)
 	}
