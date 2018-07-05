@@ -47,30 +47,4 @@ git pull $PR_URL $PR_BRANCH
 cd /go/src/github.com/apache/trafficcontrol/traffic_ops/traffic_ops_golang
 go get -u
 go build
-
-set -x
-envvars=( DB_SERVER DB_PORT DB_ROOT_PASS DB_USER DB_USER_PASS ADMIN_USER ADMIN_PASS CERT_COUNTRY CERT_STATE CERT_CITY CERT_COMPANY DOMAIN)
-for v in $envvars
-do
-	if [[ -z $$v ]]; then echo "$v is unset"; exit 1; fi
-done
-
-# Write config files
-if [[ -x /config.sh ]]; then
-	/config.sh
-fi
-
-while ! nc trafficops-perl 60443 </dev/null; do # &>/dev/null; do
-        echo "waiting for trafficops-perl:60443"
-        sleep 3
-done
-
-#cd /opt/traffic_ops/app
-#ls -l bin
-CDNCONF=/opt/traffic_ops/app/conf/cdn.conf
-DBCONF=/opt/traffic_ops/app/conf/production/database.conf
-mkdir -p /var/log/traffic_ops
-./traffic_ops_golang -cfg $CDNCONF -dbcfg $DBCONF
-
-cat /var/log/traffic_ops/*
-tail -f /dev/null
+exit 0

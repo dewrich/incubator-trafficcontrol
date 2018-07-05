@@ -39,16 +39,26 @@ networks:
       name: cdn-in-a-box_tcnet
 
 services:
-  trafficops_pr:
+  trafficcontrol-clone:
     build:
       context: .
     domainname: cdn.local
     hostname: trafficops
-    image: trafficops-go-pr
-    ports: 
-      - "7443:7443"
+    image: trafficcontrol-clone
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-tc-clone
+    env_file:
+      - variables.env
+
+  trafficops-go-pr:
+    build:
+      context: .
+    domainname: cdn.local
+    hostname: trafficops
+    image: trafficops-pr
+    build:
+      context: .
+      dockerfile: Dockerfile-go-pr
     env_file:
       - variables.env

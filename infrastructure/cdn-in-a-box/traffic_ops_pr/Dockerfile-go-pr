@@ -20,32 +20,19 @@
 # Based on CentOS 7.2
 ############################################################
 
-
-FROM centos:7
+FROM trafficcontrol-clone
 ARG PR_URL
 ENV PR_URL=$PR_URL
 
 ARG PR_BRANCH
 ENV PR_BRANCH=$PR_BRANCH
-RUN yum -y install nmap-ncat openssl git
 
-RUN mkdir -p /go/src/github.com/apache
-WORKDIR /go/src/github.com/apache
-RUN git clone https://github.com/apache/trafficcontrol
-
-WORKDIR /opt
-RUN ln -s /go/src/github.com/apache/trafficcontrol/traffic_ops/ /opt/traffic_ops
-
-RUN git config --global user.email "tc@apache.org"
-RUN git config --global user.name "Traffic Control"
-
-WORKDIR /opt/trafficcontrol
-COPY --from=trafficops-perl /opt/traffic_ops/app/local /opt/traffic_ops/app/local
-COPY --from=trafficops-perl /usr/local/go /usr/local/go
+#COPY --from=trafficcontrol-clone /go /go
+#COPY --from=trafficcontrol-clone /opt /opt
 
 EXPOSE 7443
-WORKDIR /opt/traffic_ops/app
+#WORKDIR /opt/traffic_ops/app
 
 ADD config.sh /
-ADD run-go.sh /
-CMD /run-go.sh
+ADD run-go-pr.sh /
+CMD /run-go-pr.sh

@@ -20,9 +20,7 @@
 # The Dockerfile sets up a Docker image which can be used for any new Traffic Ops container;
 # This script, which should be run when the container is run (it's the ENTRYPOINT), will configure the container.
 #
-# The following environment variables are used to configure the database and traffic ops.  They must be set
-# in ../variables.env for docker-compose to pick up the values:
-# 
+# The following environment variables must be set, ordinarily by `docker run -e` arguments:
 # DB_SERVER
 # DB_PORT
 # DB_ROOT_PASS
@@ -37,38 +35,43 @@
 # CERT_COMPANY
 # DOMAIN
 
-# TODO:  Unused -- should be removed?  TRAFFIC_VAULT_PASS
+export GOPATH=/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 # Check that env vars are set
-envvars=( DB_SERVER DB_PORT DB_ROOT_PASS DB_USER DB_USER_PASS ADMIN_USER ADMIN_PASS CERT_COUNTRY CERT_STATE CERT_CITY CERT_COMPANY DOMAIN)
+echo "PR_URL: $PR_URL"
+echo "PR_BRANCH: $PR_BRANCH"
+cd /go/src/github.com/apache/trafficcontrol
+git pull $PR_URL $PR_BRANCH
+
+cd /go/src/github.com/apache/trafficcontrol/traffic_ops/traffic_ops_golang
+
+go get
+go build
+
+set -x
+envvars=(DB_SERVER DB_PORT DB_ROOT_PASS DB_USER DB_USER_PASS ADMIN_USER ADMIN_PASS CERT_COUNTRY CERT_STATE CERT_CITY CERT_COMPANY DOMAIN)
 for v in $envvars
 do
 	if [[ -z $$v ]]; then echo "$v is unset"; exit 1; fi
 done
 
 # Write config files
-set -x
-if [[ -r /config.sh ]]; then
-	. /config.sh
+if [[ -x /config.sh ]]; then
+	/config.sh
 fi
 
-while ! nc $DB_SERVER $DB_PORT </dev/null; do # &>/dev/null; do
-        echo "waiting for $DB_SERVER $DB_PORT"
+while ! nc trafficops-perl 60443 </dev/null; do # &>/dev/null; do
+        echo "waiting for trafficops-perl:60443"
         sleep 3
 done
 
-TO_DIR=/opt/traffic_ops/app
-cat conf/production/database.conf
+#cd /opt/traffic_ops/app
+#ls -l bin
+CDNCONF=/opt/traffic_ops/app/conf/cdn.conf
+DBCONF=/opt/traffic_ops/app/conf/production/database.conf
+mkdir -p /var/log/traffic_ops
+./traffic_ops_golang -cfg $CDNCONF -dbcfg $DBCONF
 
-export PERL5LIB=$TO_DIR/lib:$TO_DIR/local/lib/perl5
-export PATH=/usr/local/go/bin:/opt/traffic_ops/go/bin:$PATH
-export GOPATH=/opt/traffic_ops/go
-
-cd $TO_DIR && \
-	./db/admin.pl --env=production reset && \
-	./db/admin.pl --env=production seed || echo "db setup failed!"
-
-/adduser.pl $TO_ADMIN_USER $TO_ADMIN_PASSWORD admin | psql -U$DB_USER -h$DB_SERVER $DB_NAME || echo "adding traffic_ops admin user failed!"
-
-cd $TO_DIR && $TO_DIR/local/bin/hypnotoad script/cdn
-exec tail -f /var/log/traffic_ops/traffic_ops.log
+cat /var/log/traffic_ops/*
+tail -f /dev/null
